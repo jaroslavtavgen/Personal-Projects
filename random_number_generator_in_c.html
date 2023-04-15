@@ -1,0 +1,41 @@
+<head>
+    <style>
+        input{
+            font-size: 0.8em;
+            width: 7em;
+        }
+        h1,p{
+            font-size:3em;
+        }
+    </style>
+</head>
+<body>
+    <article>
+    <h1>How does the C random number generator work (described in mathematical terms)?</h1>
+    <p>We take a non-zero number which is bigger than -2147483649 and smaller than 4294967296: <input class="old_state" value="1">, multiply it by 214013 and add 2531011 = <span class="new_state_unfiltered"></span>. By dividing <span class="new_state_unfiltered"></span> by 4294967296 we get the quotient <span class="state_quotient"></span> and the remainder <span class="new_state"></span>. By dividing <span class="new_state"></span> by 65536 we get the integer quotient <span class="shift_quotient"></span>. By dividing <span class="shift_quotient"></span> by 32768 we get the the quotient <span class="and_quotient"></span> and the remainder <span class="and_remainder"></span>. By dividing <span class="and_remainder"></span> by the maximum value of our desired random number increased by one <input class="max" value="100"> we get our random number: <span class="random_number"></span>.
+    </p>
+    <p>
+        If we want to generate new random number, you can use this number as a starter by clicking on it: <a class="set_the_new_old_state"></a>
+    </p>
+    <script>
+        document.getElementsByTagName`a`[0].addEventListener(`click`, a_click);
+        setInterval(a1, 250);
+        function a_click(){
+            document.getElementsByClassName`old_state`[0].value = document.getElementsByClassName`set_the_new_old_state`[0].innerHTML;
+        }
+        function a1(){
+            let old_state_number = parseInt(document.getElementsByClassName`old_state`[0].value);
+            let max_number = parseInt(document.getElementsByClassName`max`[0].value);
+            if(old_state_number === 0 || old_state_number < -2147483648 || old_state_number > 4294967295) document.getElementsByClassName`old_state`[0].value = document.getElementsByClassName`old_state`[0].value.substr(0, document.getElementsByClassName`old_state`[0].value.length-1);
+            if(max_number >32767) document.getElementsByClassName`max`[0].value = document.getElementsByClassName`max`[0].value.substr(0, document.getElementsByClassName`max`[0].value.length-1);            [...document.getElementsByClassName`new_state_unfiltered`].map(e=>e.innerHTML = parseInt(document.getElementsByClassName`old_state`[0].value) * 214013 + 2531011);
+            document.getElementsByClassName`state_quotient`[0].innerHTML = Math.floor(parseInt(document.getElementsByClassName`new_state_unfiltered`[0].innerHTML)/4294967296);
+            [...document.getElementsByClassName`new_state`].map(e=>e.innerHTML = parseInt(document.getElementsByClassName`new_state_unfiltered`[0].innerHTML)%4294967296);        
+            document.getElementsByClassName`set_the_new_old_state`[0].innerHTML = document.getElementsByClassName`new_state`[0].innerHTML;
+            [...document.getElementsByClassName`shift_quotient`].map(e=>e.innerHTML = Math.floor(parseInt(document.getElementsByClassName`new_state`[0].innerHTML)/65536));
+            document.getElementsByClassName`and_quotient`[0].innerHTML = Math.floor(parseInt(document.getElementsByClassName`shift_quotient`[0].innerHTML)/32768);
+            [...document.getElementsByClassName`and_remainder`].map(e=>e.innerHTML = parseInt(document.getElementsByClassName`shift_quotient`[0].innerHTML)%32768);                
+            document.getElementsByClassName`random_number`[0].innerHTML = parseInt(document.getElementsByClassName`and_remainder`[0].innerHTML)%parseInt(document.getElementsByClassName`max`[0].value)
+        }
+    </script>
+</article>
+</body>
