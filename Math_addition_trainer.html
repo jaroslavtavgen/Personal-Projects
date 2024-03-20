@@ -51,10 +51,9 @@ function a1(event)
         {
           limit *= 2;
           number_of_attempts = 0;
-          number_of_incorrect_answers = 0;
         }
+        number_of_incorrect_answers = 0;
         question = [Math.floor(Math.random()*limit), Math.floor(Math.random()*limit)];
-        console.log(question);
         answer = question[0] + question[1];
         tag(`span`).innerHTML = `${question[0]} + ${question[1]} = `;
         cursor = 0;
@@ -67,7 +66,10 @@ function a1(event)
       document.removeEventListener(`keypress`, a1);
       tag(`button`).style.display = `block`;
     }
-    else number_of_incorrect_answers++;
+    else{
+      cursor--;
+      number_of_incorrect_answers++;
+    }
   }
 }
 }
