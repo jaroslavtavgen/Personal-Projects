@@ -1,0 +1,72 @@
+<body>
+<script>
+function shuffle(array) {
+  let currentIndex = array.length,  randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex > 0) {
+
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+}
+function a2(){
+let tags = what => document.getElementsByTagName(what);
+let tag = what => tags(what)[0];
+tag(`html`).innerHTML = ``;
+document.body.appendChild(document.createElement(`div`));
+tag(`div`).appendChild(document.createElement(`span`));
+tag(`span`).style.fontSize = `3em`;
+tag(`div`).appendChild(document.createElement(`button`));
+tag(`button`).innerHTML = `OK`;
+tag(`button`).removeEventListener(`click`, a2);
+tag(`button`).addEventListener(`click`, a2);
+tag(`button`).style.display = `none`;
+let limit = 200;
+let number_of_attempts = 0;
+let question = [Math.floor(Math.random()*limit), Math.floor(Math.random()*limit)];
+tag(`span`).innerHTML = `${question[0]} + ${question[1]} = `;
+let answer = question[0] + question[1];
+let cursor = 0;
+document.addEventListener(`keypress`, a1);
+function a1(event)
+{
+  number_of_attempts++;
+  if("0123456789".includes(event.key))
+  {
+    if(answer.toString()[cursor++] == event.key)
+    {
+      tag(`span`).innerHTML += event.key;
+      if(cursor == answer.toString().length)
+      {
+        if(number_of_attempts == 7)
+        {
+          limit *= 2;
+          number_of_attempts = 0;
+        }
+        question = [Math.floor(Math.random()*limit), Math.floor(Math.random()*limit)];
+        console.log(question);
+        answer = question[0] + question[1];
+        tag(`span`).innerHTML = `${question[0]} + ${question[1]} = `;
+        cursor = 0;
+      }
+    }
+    else
+    {
+      tag(`span`).innerHTML += answer.toString().substring(cursor-1, answer.toString().length);
+      document.removeEventListener(`keypress`, a1);
+      tag(`button`).style.display = `block`;
+    }
+  }
+}
+}
+a2();
+</script>
+</body>
