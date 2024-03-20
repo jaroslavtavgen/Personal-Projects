@@ -30,7 +30,7 @@ tag(`button`).removeEventListener(`click`, a2);
 tag(`button`).addEventListener(`click`, a2);
 tag(`button`).style.display = `none`;
 let limit = 200;
-let number_of_attempts = 0;
+let number_of_successful_attempts = 0;
 let question = [Math.floor(Math.random()*limit), Math.floor(Math.random()*limit)];
 tag(`span`).innerHTML = `${question[0]} + ${question[1]} = `;
 let answer = question[0] + question[1];
@@ -39,7 +39,7 @@ let number_of_incorrect_answers = 0;
 document.addEventListener(`keypress`, a1);
 function a1(event)
 {
-  number_of_attempts++;
+  console.log(`event.key == ${event.key} limit = ${limit} number_of_incorrect_answers = ${number_of_incorrect_answers}  number_of_successful_attempts = ${number_of_successful_attempts}`);
   if("0123456789".includes(event.key))
   {
     if(answer.toString()[cursor++] == event.key)
@@ -47,10 +47,11 @@ function a1(event)
       tag(`span`).innerHTML += event.key;
       if(cursor == answer.toString().length)
       {
-        if(number_of_attempts == 7)
+        number_of_successful_attempts++;
+        if(number_of_successful_attempts == 7)
         {
           limit *= 2;
-          number_of_attempts = 0;
+          number_of_successful_attempts = 0;
         }
         number_of_incorrect_answers = 0;
         question = [Math.floor(Math.random()*limit), Math.floor(Math.random()*limit)];
