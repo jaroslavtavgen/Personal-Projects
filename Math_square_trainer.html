@@ -4,7 +4,7 @@
     let input, one, power;
     function regenerate(){
       input = "";
-      max *= 2;
+      max += 10;
       one = Math.floor(Math.random()*max);
       power = one * one;
       document.getElementsByTagName`span`[0].innerHTML = `${one}<sup>2</sup> = `;
@@ -19,7 +19,7 @@
     {
       input += event.key.toLowerCase();
       document.getElementsByTagName`span`[1].innerHTML =input;
-      if(!power.toString().includes(input))
+      if(!power.toString().startsWith(input))
       {
         document.removeEventListener(`keypress`, a1);
         document.getElementsByTagName`span`[1].innerHTML =power;
