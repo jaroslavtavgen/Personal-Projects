@@ -18,15 +18,16 @@
     function a1(event)
     {
       input += event.key.toLowerCase();
+      document.getElementsByTagName`span`[1].innerHTML =input;
       if(!power.toString().includes(input))
       {
         document.removeEventListener(`keypress`, a1);
+        document.getElementsByTagName`span`[1].innerHTML =power;
       }
       else if (power.toString() == input)
       {
         regenerate();
       }
-      document.getElementsByTagName`span`[1].innerHTML =input;
     }
   </script>
 </body>  
