@@ -1,5 +1,6 @@
 <body>
   <script>let max = 1;
+    let max = 1;
     let input, one, power;
     function regenerate(){
       input = "";
@@ -18,12 +19,12 @@
     {
       input += event.key.toUpperCase();
       document.getElementsByTagName`span`[1].innerHTML =input;
-      if(!power.toString(16).includes(input))
+      if(!power.toString(16).toUpperCase().startsWith(input))
       {
         document.removeEventListener(`keypress`, a1);
         document.getElementsByTagName`span`[1].innerHTML =power.toString(16).toUpperCase();
       }
-      else if (power.toString(16) == input)
+      else if (power.toString(16).toUpperCase() == input)
       {
         regenerate();
       }
