@@ -1,0 +1,32 @@
+<body>
+  <script>let max = 1;
+    let input, one, power;
+    function regenerate(){
+      input = "";
+      max += 10;
+      one = Math.floor(Math.random()*max);
+      power = one * one;
+      document.getElementsByTagName`span`[0].innerHTML = `${one.toString(16).toUpperCase()}<sup>2</sup> = `;
+      document.getElementsByTagName`span`[1].innerHTML = ``;
+    }
+    document.body.appendChild(document.createElement(`div`));
+    document.getElementsByTagName`div`[0].appendChild(document.createElement(`span`));
+    document.getElementsByTagName`div`[0].appendChild(document.createElement(`span`));
+    regenerate();
+    document.addEventListener(`keypress`, a1);
+    function a1(event)
+    {
+      input += event.key.toUpperCase();
+      document.getElementsByTagName`span`[1].innerHTML =input;
+      if(!power.toString(16).includes(input))
+      {
+        document.removeEventListener(`keypress`, a1);
+        document.getElementsByTagName`span`[1].innerHTML =power.toString(16).toUpperCase();
+      }
+      else if (power.toString(16) == input)
+      {
+        regenerate();
+      }
+    }
+  </script>
+</body>  
