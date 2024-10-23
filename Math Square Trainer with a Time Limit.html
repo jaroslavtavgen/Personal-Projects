@@ -1,5 +1,5 @@
 <body>
-  <script>
+    <script>
     document.body.style.fontSize = `3em`;
     let min = 0;
     let max = 10;
@@ -40,6 +40,7 @@
       {
         document.removeEventListener(`keypress`, a1);
         document.getElementsByTagName`span`[1].innerHTML =power;
+        document.getElementsByTagName`button`[0].style.display = `block`;   
       }
     }
     function a1(event)
@@ -55,5 +56,5 @@
         regenerate();
       }
     }
-  </script>
+    </script>
 </body>
