@@ -23,6 +23,14 @@
     document.body.appendChild(document.createElement(`div`));
     document.getElementsByTagName`div`[0].appendChild(document.createElement(`span`));
     document.getElementsByTagName`div`[0].appendChild(document.createElement(`span`));
+    document.getElementsByTagName`div`[0].appendChild(document.createElement(`span`));
+    document.getElementsByTagName`span`[2].appendChild(document.createElement(`button`));
+    document.getElementsByTagName`button`[0].style.display = `none`;
+    document.getElementsByTagName`button`[0].style.fontSize = `1em`;
+    document.getElementsByTagName`button`[0].style.marginTop = `20px`;
+    document.getElementsByTagName`button`[0].innerHTML = "Try Again!"
+    document.getElementsByTagName`button`[0].addEventListener(`click`, a3);
+    function a3(){ window.location.reload () };
     regenerate();
     document.addEventListener(`keypress`, a1);
     setInterval(a2,250);
