@@ -3,10 +3,15 @@
     let max = 1;
     let input, one, power, reference;
     let lost = false;
+    let unasked_numbers = [];
     function regenerate(){
       input = "";
-      max += 1;
-      one = Math.floor(Math.random()*max);
+      if(!unasked_numbers.length)
+      {
+        max += 10;
+        unasked_numbers = Array.from({length:max}, (_,i)=>i);
+      }
+      one = unasked_numbers.splice(Math.floor(Math.random()*unasked_numbers.length),1)[0];
       power = one * one;
       document.getElementsByTagName`span`[0].innerHTML = `${one}<sup>2</sup> = `;
       document.getElementsByTagName`span`[1].innerHTML = ``;
@@ -39,5 +44,5 @@
         regenerate();
       }
     }
-  </script>
+</script>
 </body>
