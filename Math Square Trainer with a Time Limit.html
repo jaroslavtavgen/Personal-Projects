@@ -1,15 +1,17 @@
 <body>
   <script>
-    let max = 1;
+    let min = 0;
+    let max = 10;
     let input, one, power, reference;
     let lost = false;
-    let unasked_numbers = [];
+    let unasked_numbers = Array.from({length:max},(_,i)=>i);
     function regenerate(){
       input = "";
       if(!unasked_numbers.length)
       {
         max += 10;
-        unasked_numbers = Array.from({length:max}, (_,i)=>i);
+        min += 10;
+        unasked_numbers = Array.from({length:max-min}, (_,i)=>i+min);
       }
       one = unasked_numbers.splice(Math.floor(Math.random()*unasked_numbers.length),1)[0];
       power = one * one;
@@ -44,5 +46,5 @@
         regenerate();
       }
     }
-</script>
+  </script>
 </body>
