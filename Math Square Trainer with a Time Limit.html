@@ -28,9 +28,12 @@
     }
     function a1(event)
     {
-      console.log(performance.now()-reference);
-      input += event.key.toLowerCase();
-      document.getElementsByTagName`span`[1].innerHTML =input;
+      let key = event.key.toLowerCase();
+      if(power.toString().startsWith(input+key))
+      {
+        input += key;
+      }
+      document.getElementsByTagName`span`[1].innerHTML = input;
       if (power.toString() == input)
       {
         regenerate();
