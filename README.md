@@ -2,7 +2,7 @@ Math_addition_trainer.html helps you to train your numbers addition skill. The l
 
 Math_square_trainer.html helps you to train your skills of finding a square of a number. The numbers are generated randomly, the difficulty level increases with each correct guess. Each incorrect guess ends the game.
 
-Math_square_trainer.html helps you to train your skills of finding a square of a number. The numbers are generated randomly, the difficulty level increases with each correct guess. You have 5 seconds to correctly guess the answer. Incorrect guess will formally not end the game but actually make it unwinnable.
+Math Square Trainer with a Time Limit.html helps you to train your skills of finding a square of a number. The numbers are generated randomly, the difficulty level increases with each correct guess. You have 5 seconds to correctly guess the answer. Incorrect guesses are ignored.
 
 Math_square_trainer.html helps you to train your skills of finding a square of a number. The numbers are generated randomly, the difficulty level increases with each correct guess. Each incorrect guess ends the game. The number are in hex.
 
