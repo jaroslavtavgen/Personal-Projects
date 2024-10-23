@@ -1,0 +1,40 @@
+<body>
+  <script>
+    let max = 1;
+    let input, one, power, reference;
+    let lost = false;
+    function regenerate(){
+      input = "";
+      max += 10;
+      one = Math.floor(Math.random()*max);
+      power = one * one;
+      document.getElementsByTagName`span`[0].innerHTML = `${one}<sup>2</sup> = `;
+      document.getElementsByTagName`span`[1].innerHTML = ``;
+      reference = performance.now();
+    }
+    document.body.appendChild(document.createElement(`div`));
+    document.getElementsByTagName`div`[0].appendChild(document.createElement(`span`));
+    document.getElementsByTagName`div`[0].appendChild(document.createElement(`span`));
+    regenerate();
+    document.addEventListener(`keypress`, a1);
+    setInterval(a2,250);
+    function a2()
+    {
+      if((performance.now()-reference)>5000)
+      {
+        document.removeEventListener(`keypress`, a1);
+        document.getElementsByTagName`span`[1].innerHTML =power;
+      }
+    }
+    function a1(event)
+    {
+      console.log(performance.now()-reference);
+      input += event.key.toLowerCase();
+      document.getElementsByTagName`span`[1].innerHTML =input;
+      if (power.toString() == input)
+      {
+        regenerate();
+      }
+    }
+  </script>
+</body>
