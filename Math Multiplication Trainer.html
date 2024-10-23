@@ -1,0 +1,53 @@
+<body>
+  <script>
+    document.body.style.fontSize = `3em`;
+    let min = 0;
+    let max = 20;
+    let input, one, power, reference;
+    let lost = false;
+    let unasked_numbers_one = Array.from({length:max},(_,i)=>i);
+    let unasked_numbers_two = Array.from({length:max},(_,i)=>i);
+    function regenerate(){
+      input = "";
+      if(!unasked_numbers_one.length)
+      {
+        max += 10;
+        unasked_numbers_one = Array.from({length:max-min}, (_,i)=>i+min);
+        unasked_numbers_two = Array.from({length:max-min}, (_,i)=>i+min);
+      }
+      one = unasked_numbers_one.splice(Math.floor(Math.random()*unasked_numbers_one.length),1)[0];
+      two = unasked_numbers_two.splice(Math.floor(Math.random()*unasked_numbers_two.length),1)[0];
+      power = one * two;
+      document.getElementsByTagName`span`[0].innerHTML = `${one} x ${two} = `;
+      document.getElementsByTagName`span`[1].innerHTML = ``;
+      reference = performance.now();
+    }
+    document.body.appendChild(document.createElement(`div`));
+    document.getElementsByTagName`div`[0].appendChild(document.createElement(`span`));
+    document.getElementsByTagName`div`[0].appendChild(document.createElement(`span`));
+    regenerate();
+    document.addEventListener(`keypress`, a1);
+    setInterval(a2,250);
+    function a2()
+    {
+      if((performance.now()-reference)>5000)
+      {
+        document.removeEventListener(`keypress`, a1);
+        document.getElementsByTagName`span`[1].innerHTML =power;
+      }
+    }
+    function a1(event)
+    {
+      let key = event.key.toLowerCase();
+      if(power.toString().startsWith(input+key))
+      {
+        input += key;
+      }
+      document.getElementsByTagName`span`[1].innerHTML = input;
+      if (power.toString() == input)
+      {
+        regenerate();
+      }
+    }
+  </script>
+</body>
