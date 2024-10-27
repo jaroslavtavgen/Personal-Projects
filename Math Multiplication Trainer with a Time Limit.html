@@ -1,4 +1,6 @@
+
 <body>
+    
     <script>
     document.body.style.fontSize = `3em`;
     let min = 0;
@@ -9,10 +11,11 @@
     let unasked_numbers_two = Array.from({length:max},(_,i)=>i);
     function regenerate(){
       input = "";
-      if(!unasked_numbers_one.length)
+      if(!unasked_numbers_two.length)
       {
         max += 1;
-        unasked_numbers_one = Array.from({length:max-min}, (_,i)=>i+min);
+        min += 1;
+        unasked_numbers_one = Array.from({length:max}, (_,i)=>i);
         unasked_numbers_two = Array.from({length:max-min}, (_,i)=>i+min);
       }
       one = unasked_numbers_one.splice(Math.floor(Math.random()*unasked_numbers_one.length),1)[0];
