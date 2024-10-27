@@ -207,8 +207,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     return 0;
 }
-/* This program was created with a prompt "Write a program in C++ that will be working in Windows. This program contains a window, large textbox in it and a button. You can write in the textbox, and after you click on the button the program opens the process in the memory called "cm0102.exe", takes the value (integer) stored at the address 00AE23B4. The program increases that value by 4. This value is the address the program will be checking Then the program takes the text written in the textbox. The program takes this text line by line. Each line should be split in two by the delimiter " - ".
+/* This program was created with a prompt: 
+
+"Write a program in C++ that will be working in Windows. This program contains a window, large textbox in it and a button. You can write in the textbox, and after you click on the button the program opens the process in the memory called "cm0102.exe", takes the value (integer) stored at the address 00AE23B4. The program increases that value by 4. This value is the address the program will be checking Then the program takes the text written in the textbox. The program takes this text line by line. Each line should be split in two by the delimiter " - ".
 
 When processing each line the program compares if the string at the address equals the line before the delimiter " - ". If it does not then the program increases the address by 581. And then checks if the string at this address equals the line before the delimiter " - ". If it does not equal then the program tries to do the same thing but not more than 6000 times. Once the string equals the line before delimiter " - " then the program increases address by 79 and stores the next 16 bytes starting from that address. Then the program repeats the process described in this paragraph all over again with the line after the delimiter " - " and also stores the 16 bytes.
 
-And then the program swaps 16 bytes stored from the first time to the 16 bytes stored at the second time. It means that at the address from the first time it stores the 16 bytes stored at the second time. And vice-versa: at the address from the second time it stores the 16 bytes stored at the first time" in ChatGPT-4o. It didn't initially work, i had to adjust it (the main problem was that 6000 iterations was too few - now it's 60,000 iterations).*/
+And then the program swaps 16 bytes stored from the first time to the 16 bytes stored at the second time. It means that at the address from the first time it stores the 16 bytes stored at the second time. And vice-versa: at the address from the second time it stores the 16 bytes stored at the first time"
+
+in ChatGPT-4o. It didn't initially work, i had to adjust it (the main problem was that 6000 iterations was too few - now it's 60,000 iterations).*/
