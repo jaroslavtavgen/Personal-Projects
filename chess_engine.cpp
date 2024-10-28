@@ -44,18 +44,21 @@ void parseFen(char * fen, char * board, int *caslePermissions, char * pieces, in
   }
   if(fen[++cursor] != '-')
   {
-    
-  }
+    *enPassant = fen[cursor++] - 'a' + 1;
+    *enPassant = *enPassant + ((int)fen[cursor++] + 1) * 10;
+  }  
 }
 int main()
 {
   char board[120];
   int castlePermissions[] = {15};
   int enPassant[] = {0};
+  int fiftyMoves[] = {0};
+  int numberOfFullTurnsMade[] = {0};
   char pieces[] = {'\0', 'p', 'n', 'b', 'r', 'q', 'k', 'P', 'N', 'B', 'R', 'Q', 'K'};
 'K'};
   int whose_turn[] = {0};
   for(int i=0;i<120;i++) board[i]=0;
-  parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", board, pieces, whose_turn);
+  parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq d6 0 1", board, enPassant, fiftyMoves, numberOfFullTurnsMade, pieces, whose_turn);
   return 0;
 }
