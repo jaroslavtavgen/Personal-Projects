@@ -1,14 +1,14 @@
-void parseFen(char * board, char * pieces, char * piece_numbers){
+void parseFen(char * fen, char * board, char * pieces, char * piece_numbers){
   int file = 0;
   int row = 8;
   int cursor = 0;
-  while(board[cursor] != ' ')  {
-    if ( board[cursor] >= '0' && board[cursor] <= '8')
+  while(fen[cursor] != ' ')  {
+    if ( fen[cursor] >= '0' && fen[cursor] <= '8')
     {
       int limit = (int)board[cursor];
       for(int i=0;i<limit;i++)
       {
-        board[21 + row * 10 + i] = 0;
+        board[21 + row * 10 + i] = '\0';
         file++;
       }
       cursor++;
@@ -23,11 +23,14 @@ void parseFen(char * board, char * pieces, char * piece_numbers){
         break;
       }
       if(found){
-        for(int i=0;i<14;i++)
+        for(int i=0;i<13;i++)
         {
-          
+          if(fen[cursor] == piece_numbers[i])
+          {
+            board[21 + row*10 + file] = (char)i;
+            break;
+          }
         }
-        board[21 + row*10 + file]
       }
     }
 }
