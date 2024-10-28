@@ -5,63 +5,60 @@ function splitIntoSentences(text) {
     return sentences ? sentences.map(sentence => sentence.trim()) : [];
 }
 
-let chasti_rechi = Array.from({length:11}, _=>[]);
-
-let adjectives = 0;
-let adverbs = 1;
-let chastitsy = 2;
-let deeprichastiya = 3;
-let nimetives = 4;
-let numerative = 5;
-let prichastyya = 6;
-let prepositions = 7; 
-let unions = 8;
-let verbs = 9;
-let other = 10;
-
-
-chasti_rechi[adjectives] = 'банковская банковские банковский банковских банковское больше годовом коммерческая коммерческие коммерческий коммерческое коммерческом корпоративный корпоративная корпоративное корпоративные лучшие намерен намерена огромный офисный офисная офисное первый прошлый угольная  угольные угольный угольной эстонская эстонский эстонское эстонском эстонскому юридические юридическая юридические юридическое'.split(` `);
-chasti_rechi[adverbs] = 'все всего еще когда несколько никак ничего почти'.split(` `);
-chasti_rechi[chastitsy] = 'ли лишь не'.split(` `);
-chasti_rechi[deeprichastiya] = 'включая отмечая'.split(` `);
-chasti_rechi[nimetives] = 'другая другие другой им их какая-то какие-то какой-то которая которого которое которые который которую мы нее он она они оно своем свою что этой этом этот'.split(` `);
-chasti_rechi[prichastyya] = 'действующая действующее действующей действующие действующий зарегистрирован зарегистрирована зарегистрированы'.split(` `);
-chasti_rechi[prepositions] = 'в до за к на от после с у'.split(` `);
-chasti_rechi[unions] = 'а и'.split(` `);
-chasti_rechi[verbs] = 'был была были было достигала есть закончила заявил заявила заявили заявить объясняет ответившая ответившее ответившего ответивший ответившее отвечал отвечала отвечали отвечало отвечать отвечаю отказалась отказались отказалось отказался отказаться поинтересовались поинтересовалась поинтересовался поинтересоваться попросил попросить попрошу предоставлять предоставляет предоставлял предоставляла предоставляли предоставляло продолжать прокомментировал прокомментировать снизился составил уполномочил уполномочила уполномочили'.split(` `);
-
 document.addEventListener(`click`, a1)
+
+let stored_words = [
+  { value: "в", type: "preposition" },
+  { value: "времена", type: "noun", singular:false, gender: "neutral", case: "nominative" },
+  { value: "год", type: "noun", singular:true, gender: "male", case: "nominative" },
+  { value: "достигала", aspect: "imperfective", type: "verb", singular:true, tense: "past", gender: "female"},
+  { value: "закончила",aspect: "perfective",  type: "verb", singular:true, tense: "past", gender: "female"},
+  { value: "компании", type: "noun", singular:true, gender: "female", case: "genitive" },
+  { value: "компания", type: "noun", singular:true, gender: "female", case: "nominative" },
+  { value: "лучшие", type: "adjective", singular:false},
+  { value: "миллион", type: "noun", singular:true, gender: "male", case: "nominative" },
+  { value: "миллионов", type: "noun", singular:false, gender: "male", case: "genitive" },
+  { value: "почти", type: "adverb" },
+  { value: "прибыль", type: "noun", singular:true, gender: "female", case: "nominative" },
+  { value: "прошлая", type: "adjective", singular:true, gender: "female"},
+  { value: "прошлый", type: "adjective", singular:true, gender: "male"},
+  { value: "с", type: "preposition" },
+  { value: "свой", type: "pronoun", singular:true, gender: "male", case: "nominative" },
+  { value: "убытки", type: "noun", singular:false, gender: "male", case: "nominative" },
+  { value: "убытком", type: "noun", singular:true, gender: "male", case: "instrumental" },
+  { value: "убыток", type: "noun", singular:true, gender: "male", case: "nominative" },
+  { value: "эстонская", type: "noun", singular:true, gender: "female", case: "nominative" },
+  { value: "эстонский", type: "noun", singular:true, gender: "male", case: "nominative" },
+  { value: "этой", type: "pronoun", singular:true, gender: "female", case: "genitive" },
+];
+
+
+let statistics = Array.from({length: 10}, _=>Array.from({length: 20}, _=>0));
+
 function a1(event)
 {
-  let nouns = [];
   let sentences = splitIntoSentences(event.target.innerText);
-  for(let sentence=0;sentence<sentences.length;sentence++)
+  one: for(let sentence=0;sentence<sentences.length;sentence++)
   {
-    let words = sentences[sentence].match(/[а-я0-9\-]+/gi).map(e=>e.toLowerCase());
-    let arr = Array.from({length:words.length}, _=>0);
+    let words = sentences[sentence].match(/[а-яa-z0-9\-]+/gi).map(e=>e.toLowerCase());
+    
     for(let word=0;word<words.length;word++)
     {
-      let found = 0;
-      for(let chast_rechi=0;chast_rechi<chasti_rechi.length-1;chast_rechi++)
-      {
-        if(chasti_rechi[chast_rechi].includes(words[word]))
+      if(word == 10) break;
+      if(!stored_words.filter(e=>e["value"]==words[word]).length){
+        if(words[word].match(/[a-z]+/gi) && words[word].match(/[a-z]+/gi)[0] == words[word])
         {
-          arr[word] = chast_rechi;
-          found = 1;
-          break
+          statistics[word][0] += 1;
         }
-      }
-      if(!found)
-      {
-        if(words[word].match(/\d+/gi) && (words[word] == words[word].match(/\d+/gi)))
+        else if(words[word].match(/[0-9]+/gi) && words[word].match(/[0-9]+/gi)[0] == words[word])
         {
-          arr[word] = numerative;
+          statistics[word][1] += 1;
         }
         else{
-          if(!nouns.includes(words[word])) nouns.push(words[word]);
+          console.log(words[word]);
+          break one;
         }
       }
     }
   }
-  console.log(nouns);
 }
