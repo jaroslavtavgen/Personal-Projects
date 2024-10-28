@@ -14,33 +14,45 @@ let stored_words = [
   { value: "году", type: "noun", singular:"true", gender: "male", case: "prepositional" },
   { value: "годовом", type: "adjective", singular:"true", gender: "male", case: "instrumental", degree: "none" },
   { value: "достигала", aspect: "imperfective", type: "verb", singular:"true", tense: "past", gender: "female"},
+  { value: "есть",aspect: "imperfective",  type: "verb", singular:"true", tense: "present"},
   { value: "еще", type: "adverb"},
   { value: "закончила",aspect: "perfective",  type: "verb", singular:"true", tense: "past", gender: "female"},
+  { value: "зарегистрирована",aspect: "perfective",  type: "participle", singular:"true", gender: "female"},
+  { value: "здании", type: "noun", singular:"true", gender: "female", case: "prepositional" },
   { value: "и", type: "union"},
   { value: "компании", type: "noun", singular:"true", gender: "female", case: "genitive" },
+  { value: "компанию", type: "noun", singular:"true", gender: "female", case: "accusative" },
   { value: "компания", type: "noun", singular:"true", gender: "female", case: "nominative" },
   { value: "лучшие", type: "adjective", singular:"false", degree: "superlative", case: "nominative"},
   { value: "миллион", type: "noun", singular:"true", gender: "male", case: "nominative" },
   { value: "миллиона", type: "noun", singular:"true", gender: "male", case: "genitive" },
   { value: "миллионов", type: "noun", singular:"false", gender: "male", case: "genitive" },
   { value: "не", type: "particle", },
+  { value: "нее", type: "pronoun", singular:"true", gender: "female", case: "genitive" },
   { value: "никак", type: "adverb", },
   { value: "оборот", type: "noun", singular:"true", gender: "male", case: "nominative" },
   { value: "объясняет", aspect: "imperfective", type: "verb", singular:"true", tense: "present"},
   { value: "огромный", type: "adjective", singular:"true", gender: "male", degree: "none"},
+  { value: "офисном", type: "noun", singular:"true", gender: "male", case: "prepositional" },
   { value: "отчете", type: "noun", singular:"true", gender: "male", case: "prepositional" },
   { value: "почти", type: "adverb" },
   { value: "прибыль", type: "noun", singular:"true", gender: "female", case: "nominative" },
   { value: "прошлая", type: "adjective", singular:"true", gender: "female", degree: "none", case: "nominative"},
   { value: "прошлый", type: "adjective", singular:"true", gender: "male", degree: "none", case: "nominative"},
+  { value: "руководители", type: "noun", singular:"false", gender: "male", case: "nominative" },
   { value: "с", type: "preposition" },
   { value: "своем", type: "pronoun", singular:"true", gender: "male", case: "prepositional" },
   { value: "свой", type: "pronoun", singular:"true", gender: "male", case: "nominative" },
   { value: "снизился",aspect: "perfective",  type: "verb", singular:"true", tense: "past", gender: "male"},
   { value: "составил", aspect: "perfective", type: "verb", singular:"true", tense: "past", gender: "male"},
+  { value: "таллинна", type: "noun", singular:"true", gender: "male", case: "genitive" },
+  { value: "у", type: "preposition" },
   { value: "убытки", type: "noun", singular:"false", gender: "male", case: "nominative" },
   { value: "убытком", type: "noun", singular:"true", gender: "male", case: "instrumental" },
   { value: "убыток", type: "noun", singular:"true", gender: "male", case: "nominative" },
+  { value: "уполномочили",aspect: "perfective",  type: "verb", singular:"false", tense: "past"},
+  { value: "фирма", type: "noun", singular:"true", gender: "female", case: "nominative" },
+  { value: "центре", type: "noun", singular:"true", gender: "male", case: "prepositional" },
   { value: "эстонская", type: "adjective", singular:"true", gender: "female", case: "nominative" },
   { value: "эстонский", type: "adjective", singular:"true", gender: "male", case: "nominative" },
   { value: "этой", type: "pronoun", singular:"true", gender: "female", case: "genitive" },
@@ -83,10 +95,17 @@ function process(event)
           else if ( ["verb"].includes ( stored_word [ "type" ] ) )
           {
             increaseProperty ( statistics [ w ], "aspect_" + stored_word [ "aspect" ] );
-            increaseProperty ( statistics [ w ], "gender_" + stored_word [ "gender" ] );
+            if ( ( stored_word [ "tense" ] == "past" ) && ( stored_word [ "singular" ] == "true" ) ) increaseProperty ( statistics [ w ], "gender_" + stored_word [ "gender" ] );
             if ( stored_word [ "singular" ] == "true" ) increaseProperty ( statistics [ w ], "singular_true" );
             else  increaseProperty ( statistics [ w ], "singular_false" );
             increaseProperty ( statistics [ w ], "tense_" + stored_word [ "tense" ] );
+          }
+          else if ( ["participle"].includes ( stored_word [ "type" ] ) )
+          {
+            increaseProperty ( statistics [ w ], "aspect_" + stored_word [ "aspect" ] );
+            increaseProperty ( statistics [ w ], "gender_" + stored_word [ "gender" ] );
+            if ( stored_word [ "singular" ] == "true" ) increaseProperty ( statistics [ w ], "singular_true" );
+            else  increaseProperty ( statistics [ w ], "singular_false" );
           }
           found = 1;
           break;
@@ -224,7 +243,31 @@ function process(event)
     }
     else if ( [ "verb" ].includes ( best_type_name ) )
     {
-      vtr.push ( `${i+1}) ${best_aspect_name} ${best_gender_name} ${best_singular_name} ${best_tense_name}` );
+      if ( ( best_tense_name == "past" ) && ( best_singular_name == "true" ) ){
+        vtr.push ( `${i+1}) ${best_aspect_name} ${best_gender_name} ${best_singular_name} ${best_tense_name} ${best_type_name}` );
+      }
+      else {
+        vtr.push ( `${i+1}) ${best_aspect_name} ${best_singular_name} ${best_tense_name} ${best_type_name}` );
+      }
+      let chosen_word;
+      while ( true )
+      {
+        chosen_word = stored_words [ Math.floor ( Math.random () * stored_words.length ) ];
+        if( chosen_word [ "aspect" ] != best_aspect_name ) continue;
+        if ( ( best_tense_name == "past" ) && ( best_singular_name == "true" ) )
+        { 
+          if( chosen_word [ "gender" ] != best_gender_name ) continue;
+        }
+        if( chosen_word [ "singular" ] != best_singular_name ) continue;
+        if( chosen_word [ "tense" ] != best_tense_name ) continue;
+        if( chosen_word [ "type" ] != best_type_name ) continue;
+        break;
+      }
+      vtr2.push ( chosen_word [ "value" ] );
+    }
+    else if ( [ "participle" ].includes ( best_type_name ) )
+    {
+      vtr.push ( `${i+1}) ${best_aspect_name} ${best_gender_name} ${best_singular_name} ${best_type_name}` );
       let chosen_word;
       while ( true )
       {
@@ -232,7 +275,6 @@ function process(event)
         if( chosen_word [ "aspect" ] != best_aspect_name ) continue;
         if( chosen_word [ "gender" ] != best_gender_name ) continue;
         if( chosen_word [ "singular" ] != best_singular_name ) continue;
-        if( chosen_word [ "tense" ] != best_tense_name ) continue;
         if( chosen_word [ "type" ] != best_type_name ) continue;
         break;
       }
