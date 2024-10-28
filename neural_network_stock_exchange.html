@@ -1,0 +1,80 @@
+<script>
+let quotes = [5808.12, 5809.86, 5797.42, 5851.2, 5853.98, 5864.67, 5841.47, 5842.47, 5815.26, 5859.85, 5815.03, 5780.05, 5792.04, 5751.13, 5695.94, 5751.07, 5699.94, 5709.54, 5708.75, 5762.48, 5738.17, 5745.37, 5722.26, 5732.93, 5718.57, 5702.55, 5713.64, 5618.26, 5634.58, 5633.09, 5626.02, 5595.76, 5554.13, 5495.52, 5471.05, 5408.42, 5503.41, 5520.07, 5528.93, 5648.4, 5591.96, 5592.18, 5625.8, 5616.84, 5634.61, 5570.64, 5620.85, 5597.12, 5608.25, 5554.25, 5543.22, 5455.21, 5434.43, 5344.39, 5344.16, 5319.31, 5199.5, 5240.03, 5186.33, 5346.56, 5446.68, 5522.3, 5436.44, 5463.54, 5459.1, 5399.22, 5427.13, 5555.74, 5564.41, 5505, 5544.59, 5588.27, 5667.2, 5631.22, 5615.35, 5584.54, 5633.91, 5576.98, 5572.85, 5567.19, 5537.02, 5509.01, 5475.09, 5460.48, 5482.87, 5477.9, 5469.3, 5447.87, 5464.62, 5473.17, 5487.03, 5473.23, 5431.6, 5433.74, 5421.03, 5375.32, 5360.79, 5346.99, 5352.96, 5354.03];
+
+let number_of_neurons = 1;
+let number_of_parallel_universes = 1;
+let weights = [];
+let best_actual_difference = Infinity;
+let times2 = 0;
+while(true)
+{
+  for(let universe=0;universe<number_of_parallel_universes;universe++)
+  {
+    for(let neuron=0;neuron<number_of_neurons;neuron++)
+    {
+      weights.push(Math.random() - 0.5);
+    }
+  }
+  for(let universe=0;universe<number_of_parallel_universes;universe++)
+  {
+    weights.push(we); we+=0.1;
+  }
+  let best_difference = Infinity;
+  let best_weights = [];
+  for(let times=0;times<20000;times++)
+  {
+    if(times>0)
+    {
+      weights = weights.map(e=>Math.random() - 0.5);
+    }
+    let difference_sum = 0;
+    for(let quote=number_of_neurons; quote<quotes.length/2;quote++)
+    {
+      let sum = 0;
+      for(let universe=0;universe<number_of_parallel_universes;universe++)
+      {
+        let universe_sum = 0;
+        for(let neuron=0;neuron<number_of_neurons;neuron++)
+        {
+          universe_sum += weights[universe * number_of_neurons + neuron] * quotes[quote - number_of_neurons + neuron];
+        }
+        sum += universe_sum * weights[number_of_parallel_universes * number_of_neurons + universe];
+      }
+      difference_sum += Math.abs(sum - quotes[quote+1]);
+    }
+    if(best_difference > difference_sum)
+    {
+      best_difference = difference_sum;
+      best_weights = [...weights];
+    }
+  }
+  weights = [...best_weights];
+  difference_sum = 0;
+  for(let quote=quotes.length/2; quote<quotes.length-1;quote++)
+  {
+    let sum = 0;
+    for(let universe=0;universe<number_of_parallel_universes;universe++)
+    {
+      let universe_sum = 0;
+      for(let neuron=0;neuron<number_of_neurons;neuron++)
+      {
+        universe_sum += weights[universe * number_of_neurons + neuron] * quotes[quote - number_of_neurons + neuron];
+      }
+      sum += universe_sum * weights[number_of_parallel_universes * number_of_neurons + universe];
+    }
+    difference_sum += Math.abs(sum - quotes[quote+1]);
+  }
+  if ( best_actual_difference > difference_sum )
+  {
+    best_actual_difference = difference_sum;
+    best_weights = [...weights];
+    console.log(`times2 = ${times2}`);
+    console.log(`best_actual_difference = ${best_actual_difference}`);
+    console.log(`number_of_parallel_universes = ${number_of_parallel_universes}`);
+    console.log(`let weights = [${best_weights.join(", ")}];`)
+  }
+  if(!(times2%100000)) console.log(`times2 = ${times2}`);
+  number_of_parallel_universes++;
+  times2++;
+}
+</script>

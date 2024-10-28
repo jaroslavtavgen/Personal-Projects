@@ -25,6 +25,7 @@ void parseFen(char * board, char * pieces, char * piece_numbers){
       if(found){
         for(int i=0;i<14;i++)
         {
+          
         }
         board[21 + row*10 + file]
       }
