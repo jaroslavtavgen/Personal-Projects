@@ -1,0 +1,71 @@
+6A 02 68 8C 2C 40 00 68 00 30 40 00 E8 01 00 00 00 90 50 8B 44 24 08 FF 30 83 C0 04 FF 30 53 51
+52 55 57 56 8B 6C 24 28 BB 00 CA 9A 3B C7 45 00 FF FF FF 7F 83 C5 04 C7 45 00 00 00 00 80 83 ED
+04 85 DB 74 1A FF 54 24 2C 3B 45 00 7D 03 89 45 00 83 C5 04 3B 45 00 7E 03 89 45 00 4B EB DF 5E
+5F 5D 5A 83 7C 24 20 01 75 06 59 5B 58 58 58 C3 8B 4C 24 18 8B 01 83 C1 04 8B 11 83 E9 04 8B 5C
+24 0C 89 19 8B 5C 24 08 83 C1 04 89 19 59 5B 83 C4 0C C3
+00401AF8     6A 02          PUSH 2
+00401AFA     68 8C2C4000    PUSH <JMP.&msvcrt.rand>                  ;  Entry address
+00401AFF     68 00304000    PUSH ttt.00403000
+00401B04     E8 01000000    CALL ttt.00401B0A
+00401B09     90             NOP
+00401B0A     50             PUSH EAX
+00401B0B     8B4424 08      MOV EAX,DWORD PTR SS:[ESP+8]
+00401B0F     FF30           PUSH DWORD PTR DS:[EAX]
+00401B11     83C0 04        ADD EAX,4
+00401B14     FF30           PUSH DWORD PTR DS:[EAX]
+00401B16     53             PUSH EBX
+00401B17     51             PUSH ECX
+00401B18     52             PUSH EDX
+00401B19     55             PUSH EBP
+00401B1A     57             PUSH EDI
+00401B1B     56             PUSH ESI
+00401B1C     8B6C24 28      MOV EBP,DWORD PTR SS:[ESP+28]
+00401B20     BB 00CA9A3B    MOV EBX,3B9ACA00
+00401B25     C745 00 FFFFFF>MOV DWORD PTR SS:[EBP],7FFFFFFF
+00401B2C     83C5 04        ADD EBP,4
+00401B2F     C745 00 000000>MOV DWORD PTR SS:[EBP],80000000
+00401B36     83ED 04        SUB EBP,4
+00401B39     85DB           TEST EBX,EBX
+00401B3B     74 1A          JE SHORT ttt.00401B57
+00401B3D     FF5424 2C      CALL DWORD PTR SS:[ESP+2C]
+00401B41     3B45 00        CMP EAX,DWORD PTR SS:[EBP]
+00401B44     7D 03          JGE SHORT ttt.00401B49
+00401B46     8945 00        MOV DWORD PTR SS:[EBP],EAX
+00401B49     83C5 04        ADD EBP,4
+00401B4C     3B45 00        CMP EAX,DWORD PTR SS:[EBP]
+00401B4F     7E 03          JLE SHORT ttt.00401B54
+00401B51     8945 00        MOV DWORD PTR SS:[EBP],EAX
+00401B54     4B             DEC EBX
+00401B55    ^EB DF          JMP SHORT ttt.00401B36
+00401B57     5E             POP ESI
+00401B58     5F             POP EDI
+00401B59     5D             POP EBP
+00401B5A     5A             POP EDX
+00401B5B     837C24 20 01   CMP DWORD PTR SS:[ESP+20],1
+00401B60     75 06          JNZ SHORT ttt.00401B68
+00401B62     59             POP ECX
+00401B63     5B             POP EBX
+00401B64     58             POP EAX
+00401B65     58             POP EAX
+00401B66     58             POP EAX
+00401B67     C3             RETN
+00401B68     8B4C24 18      MOV ECX,DWORD PTR SS:[ESP+18]
+00401B6C     8B01           MOV EAX,DWORD PTR DS:[ECX]
+00401B6E     83C1 04        ADD ECX,4
+00401B71     8B11           MOV EDX,DWORD PTR DS:[ECX]
+00401B73     83E9 04        SUB ECX,4
+00401B76     8B5C24 0C      MOV EBX,DWORD PTR SS:[ESP+C]
+00401B7A     8919           MOV DWORD PTR DS:[ECX],EBX
+00401B7C     8B5C24 08      MOV EBX,DWORD PTR SS:[ESP+8]
+00401B80     83C1 04        ADD ECX,4
+00401B83     8919           MOV DWORD PTR DS:[ECX],EBX
+00401B85     59             POP ECX
+00401B86     5B             POP EBX
+00401B87     83C4 0C        ADD ESP,0C
+00401B8A     C3             RETN
+
+Documentation: 
+This function executes some function (address of which is stated in the second parameter) 1 billion times and stores the biggest and the smallest value of it (provided that function returns the value in the EAX register). 
+The first parameter: if it equals 1 then the values will be stored in at the address stated in the third parameter and also at the address "third parameter + 4". If it equals 2 then the values will be stored in EAX and EDX registers and the address stated in the third parameter and the one after that will remain untouched.
+The second parameter: function which will be invoked a billion times.
+The third parameter: address where the smallest and biggest values will be temporarily stored (the address stated in the third parameter and the next (+4) one will be used) .If the first parameter is 2 then initial values of the addresses stated in the third parameter will be restored.
