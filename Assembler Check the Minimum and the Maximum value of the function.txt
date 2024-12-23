@@ -66,6 +66,9 @@
 
 Documentation: 
 This function executes some function (address of which is stated in the second parameter) 1 billion times and stores the biggest and the smallest value of it (provided that function returns the value in the EAX register). 
+
 The first parameter: if it equals 1 then the values will be stored in at the address stated in the third parameter and also at the address "third parameter + 4". If it equals 2 then the values will be stored in EAX and EDX registers and the address stated in the third parameter and the one after that will remain untouched.
+
 The second parameter: function which will be invoked a billion times.
+
 The third parameter: address where the smallest and biggest values will be temporarily stored (the address stated in the third parameter and the next (+4) one will be used) .If the first parameter is 2 then initial values of the addresses stated in the third parameter will be restored.
