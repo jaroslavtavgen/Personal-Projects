@@ -44,16 +44,19 @@ function print_multiplication_table(min, half_max){
 let div = document.createElement(`div`);
 div.id = `game`;
 document.body.appendChild(div);
-print_multiplication_table(2,13)
+print_multiplication_table(2,8)
 let selected_square = "none";
 document.addEventListener(`click`, function(event){
   if(selected_square == "none")
   {
     selected_square = event.target.id;
-    event.target.dataset.previous = event.target.innerHTML;
-    event.target.innerHTML = event.target.innerHTML.split(` = `)[0] + ` = `;
+    let element = event.target;
+    selected_square = Math.floor ( Math.random () * [...document.getElementsByTagName(`span`)].length )
+    element = document.getElementById(selected_square)
+    element.dataset.previous = element.innerHTML;
+    element.innerHTML = element.innerHTML.split(` = `)[0] + ` = `;
     [...document.getElementsByTagName(`span`)].map(span=>{
-      if(span.id != event.target.id){
+      if(span.id != element.id){
         span.dataset.previous = span.innerHTML;
         span.innerHTML = ``;
       }
