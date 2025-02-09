@@ -1,0 +1,38 @@
+<body>
+<script>
+function print_multiplication_table(min, half_max){
+    let max = half_max * 2 - 1;
+    let table = document.createElement(`table`);
+    table.border = "1"
+    for(let i=min; i<=max;i++){
+        let tr = document.createElement(`tr`);
+        for(let j=min; j<=half_max;j++){
+            let td = document.createElement(`td`);
+            let result = i * j;
+            let expression = `${j} x ${i} = ${result}`;
+            td.innerHTML = expression;
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+    }
+    let tr = document.createElement(`tr`);
+    let td = document.createElement(`td`);
+    td.innerHTML = `&nbsp;`;
+    tr.appendChild(td);
+    table.appendChild(tr);
+    for(let i=min; i<=max;i++){
+        let tr = document.createElement(`tr`);
+        for(let j=half_max+1; j<=max;j++){
+            let td = document.createElement(`td`);
+            let result = i * j;
+            let expression = `${j} x ${i} = ${result}`;
+            td.innerHTML = expression;
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+    }
+    document.getElementById(`game`).appendChild(table);    
+}
+print_multiplication_table(2,13)
+</script>
+</body>
