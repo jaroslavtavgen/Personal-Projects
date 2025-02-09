@@ -2,34 +2,42 @@
 <script>
 function print_multiplication_table(min, half_max){
     let max = half_max * 2 - 1;
-    let table = document.createElement(`table`);
-    table.border = "1"
+    let table = document.createElement(`div`);
+    let next_id = 1;
     for(let i=min; i<=max;i++){
-        let tr = document.createElement(`tr`);
+        let row = document.createElement(`div`);
         for(let j=min; j<=half_max;j++){
-            let td = document.createElement(`td`);
+            let span = document.createElement(`span`);
+            span.style.display = `inline-block`
+            span.style.height = `20px`;
+            span.style.width = `100px`;
             let result = i * j;
             let expression = `${j} x ${i} = ${result}`;
-            td.innerHTML = expression;
-            tr.appendChild(td);
+            span.innerHTML = expression;
+            span.id = next_id++;
+            row.appendChild(span);
         }
-        table.appendChild(tr);
+        table.appendChild(row);
     }
-    let tr = document.createElement(`tr`);
-    let td = document.createElement(`td`);
-    td.innerHTML = `&nbsp;`;
-    tr.appendChild(td);
-    table.appendChild(tr);
+    let row = document.createElement(`div`);
+    let span = document.createElement(`span`);
+    span.innerHTML = `&nbsp;`;
+    row.appendChild(span);
+    table.appendChild(row);
     for(let i=min; i<=max;i++){
-        let tr = document.createElement(`tr`);
+        let row = document.createElement(`div`);
         for(let j=half_max+1; j<=max;j++){
-            let td = document.createElement(`td`);
+            let span = document.createElement(`span`);
+            span.style.display = `inline-block`
+            span.style.height = `20px`;
+            span.style.width = `100px`;
             let result = i * j;
             let expression = `${j} x ${i} = ${result}`;
-            td.innerHTML = expression;
-            tr.appendChild(td);
+            span.innerHTML = expression;
+            span.id = next_id++;
+            row.appendChild(span);
         }
-        table.appendChild(tr);
+        table.appendChild(row);
     }
     document.getElementById(`game`).appendChild(table);    
 }
@@ -37,5 +45,26 @@ let div = document.createElement(`div`);
 div.id = `game`;
 document.body.appendChild(div);
 print_multiplication_table(2,13)
+let selected_square = "none";
+document.addEventListener(`click`, function(event){
+  if(selected_square == "none")
+  {
+    selected_square = event.target.id;
+    event.target.dataset.previous = event.target.innerHTML;
+    event.target.innerHTML = event.target.innerHTML.split(` = `)[0] + ` = `;
+    [...document.getElementsByTagName(`span`)].map(span=>{
+      if(span.id != event.target.id){
+        span.dataset.previous = span.innerHTML;
+        span.innerHTML = ``;
+      }
+    });
+  }
+  else{
+    [...document.getElementsByTagName(`span`)].map(span=>{
+      span.innerHTML = span.dataset.previous;
+      selected_square = "none"
+    });
+  }
+});
 </script>
 </body>
