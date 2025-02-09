@@ -33,6 +33,9 @@ function print_multiplication_table(min, half_max){
     }
     document.getElementById(`game`).appendChild(table);    
 }
+let div = document.createElement(`div`);
+div.id = `game`;
+document.body.appendChild(div);
 print_multiplication_table(2,13)
 </script>
 </body>
