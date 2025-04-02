@@ -8,7 +8,7 @@ let numberOfRedKings = 0;
 let numberOfWhitePieces = 0;
 let numberOfWhiteKings = 0;
 let three = 4;
-let four = three+1;
+let four = three+2;
 let five = four+1;
 let eleven = five+6;
 let twenty = eleven+9;
@@ -201,7 +201,8 @@ function minimax(previousMoveWasAJump, depth, history1) {
     playFurther = true;
     moves = generateMoves ();
   }
-  if ( !moves [ 0 ].length ) {
+  console.log(moves);
+  if ( !moves.length ) {
     return -300000;
   }
   if ( !playFurther ) {
