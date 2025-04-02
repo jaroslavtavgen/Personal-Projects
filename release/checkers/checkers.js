@@ -7,7 +7,7 @@ let numberOfRedPieces = 0;
 let numberOfRedKings = 0;
 let numberOfWhitePieces = 0;
 let numberOfWhiteKings = 0;
-let three = 6;
+let three = 4;
 let four = three+1;
 let five = four+1;
 let eleven = five+6;
@@ -227,11 +227,7 @@ function minimax(previousMoveWasAJump, depth, history1) {
       if ( found ) break;
     }
     let currentScore;
-    if ( numberOfMovesWithoutACapture >= 40 ) {
-      takeBackTheMove ( move, arr [ 0 ], arr [ 1 ], arr [ 2 ] );
-      currentScore = 0;      
-    }
-    else if ( found ) {
+    if ( found ) {
       takeBackTheMove ( move, arr [ 0 ], arr [ 1 ], arr [ 2 ] );
       currentScore = 0;
     }
