@@ -13,12 +13,28 @@ let five = 5;
 let eleven = 11;
 let twenty = 20;
 let eight = 8;
+if ( Math.random () < 0.5 ) eight = 10;
 let seven = eight-1;
 let nine = eight+1;
 let ten = eight + 2;
 let eighteen = nine * 2;
 let elevenBoard = ten + 1;
-let twenty_two = eleven * 2;
+let twentyOne = ten * 2 + 1;
+let twenty_two = elevenBoard * 2;
+for ( let i = 0; i < eight; i++ ) {
+  for ( let j = 0; j < eight; j++ ) {
+    let div = document.createElement(`div`);
+    div.classList.add(`square`);
+    if ( (i%2) != (j%2) ){
+      div.classList.add ( `black` );
+      let div2 = document.createElement ( `div`);
+      div2.classList.add ( `piece` );
+      div.appendChild ( div2 );
+    }
+    document.getElementById(`game`).appendChild ( div );
+  }
+  document.getElementById(`game`).appendChild ( document.createElement ( `br` ) );
+}
 let ply = 1;
 let redKing = 2;
 let redMan = 1;
@@ -27,46 +43,71 @@ let size = 8;
 let whiteKing = 4;
 let whiteMan = 3;
 currentPlayer = redMan;
-for ( let row = 0;row < eight; row++ ) {
-    for ( let column = 0; column < eight; column++ ) {
-        let index = 21 + row * ten + column;
-        let square = document.getElementsByClassName(`square`) [ ( seven - row ) * eight + column ];
-        square.id = index;
-        square.addEventListener(`click`, a1);
-        if(row==0 || row == 2){
-            board[index] = (column+1)%2;
-            //board [ index ] = 0;
-            if(column%2 == 0) score [ 1 ] += 1;
-        }
-        else if(row==1){
-            board[index] = (column)%2;
-            //board [ index ] = 0;
-            if(column%2 == 1) score [ 1 ] += 1;
-        }
-        else if(row==5 || row == 7){
-            board[index] = (column%2) * 3;
-            //board [ index ] = 0;
-            if(column%2 == 1) score [ 3 ] += 1;
-        }
-        else if(row==6){
-            board[index] = ((column+1)%2)*3;
-            //board [ index ] = 0;
-            if(column%2 == 0) score [ 3 ] += 1;
-        }
-        else{
-            board[index] = 0;
-        }
-    }
+let humanPlayer = redMan;
+if ( Math.random () < 0.5 ) humanPlayer = whiteMan;
+if ( eight == 8 ) {
+  for ( let row = 0;row < eight; row++ ) {
+      for ( let column = 0; column < eight; column++ ) {
+          let index = twentyOne + row * ten + column;
+          let square = document.getElementsByClassName(`square`) [ ( seven - row ) * eight + column ];
+          square.id = index;
+          square.addEventListener(`click`, a1);
+          if(row==0 || row == 2){
+              board[index] = (column+1)%2;
+              //board [ index ] = 0;
+          }
+          else if(row==1){
+              board[index] = (column)%2;
+              //board [ index ] = 0;
+          }
+          else if(row==5 || row == 7){
+              board[index] = (column%2) * 3;
+              //board [ index ] = 0;
+          }
+          else if(row==6){
+              board[index] = ((column+1)%2)*3;
+              //board [ index ] = 0;
+          }
+          else{
+              board[index] = 0;
+          }
+      }
+  }
 }
-/*board [ 98 ] = 2;
-board [ 81 ] = 1;
-board [ 83 ] = 2;
-board [ 85 ] = 2;
-board [ 72 ] = 1;
-board [ 78 ] = 1;
-board [ 58 ] = 2;
-board [ 38 ] = 4;
-board [ 23 ] = 4;*/
+if ( eight == 10 ) {
+  for ( let row = 0;row < eight; row++ ) {
+      for ( let column = 0; column < eight; column++ ) {
+          let index = twentyOne + row * ten + column;
+          let square = document.getElementsByClassName(`square`) [ ( seven - row ) * eight + column ];
+          square.id = index;
+          square.addEventListener(`click`, a1);
+          if(row==0 || row == 2){
+              board[index] = (column+1)%2;
+              //board [ index ] = 0;
+          }
+          else if(row==1 || row==3){
+              board[index] = (column)%2;
+              //board [ index ] = 0;
+          }
+          else if(row==7 || row ==9){
+              board[index] = (column%2) * 3;
+              //board [ index ] = 0;
+          }
+          else if(row==6||row==8){
+              board[index] = ((column+1)%2)*3;
+              //board [ index ] = 0;
+          }
+          else{
+              board[index] = 0;
+          }
+      }
+  }
+}
+/*board [ 92 ] = 2;
+board [ 94 ] = 2;
+board [ 96 ] = 2;
+board [ 98 ] = 2;
+board[ 21 ] = 4;*/
 score = [
   0, 
   board.filter ( e=>e==redMan ).length, 
@@ -75,7 +116,7 @@ score = [
   board.filter ( e=>e==whiteKing ).length
 ];
 let number = 0;
-minimax ( false, 1, [] );
+if ( humanPlayer == whiteMan ) minimax ( false, 1, [] );
 parseBoard ();
 let legalMoves = generateMoves();
 function toggleSide() {
@@ -165,7 +206,7 @@ function minimax(previousMoveWasAJump, depth, history1) {
   }
   if ( !playFurther ) {
     let returnScore = score [ 1 ] + 1.5 * score [ 2 ] - score [ 3 ] - 1.5 * score [ 4 ];
-    if ( currentPlayer == redMan ) return -returnScore;
+    if ( currentPlayer == whiteMan ) return -returnScore;
     return returnScore;
   }
   let bestMove = -1;
@@ -193,7 +234,7 @@ function minimax(previousMoveWasAJump, depth, history1) {
     else{
       ply += 1;
       history1.push([...board]);
-      currentScore = minimax ( move [ 4 ], depth + 1, history1 );
+      currentScore = -minimax ( move [ 4 ], depth + 1, history1 );
       history1.pop();
       ply -= 1;
       takeBackTheMove ( move, arr [ 0 ], arr [ 1 ], arr [ 2 ] );
@@ -203,7 +244,9 @@ function minimax(previousMoveWasAJump, depth, history1) {
       bestMove = move;
     }  
   }
-  if ( ply == 1 ) makeTheMove ( bestMove );
+  if ( ply == 1 ) {
+    makeTheMove ( bestMove );
+  }
   return bestScore;
 }
 function makeTheMove ( move ) {
@@ -217,13 +260,13 @@ function makeTheMove ( move ) {
     numberOfMovesWithoutACapture++;
   }
   board [ move [ 1 ] ] = piece;
-  if ( Math.floor ( move [ 1 ] - 2 ) == seven && piece == redMan && currentPlayer == redMan ) {
+  if ( ( Math.floor ( move [ 1 ] / ten ) - 2 )  == seven && piece == redMan && currentPlayer == redMan ) {
     numberOfMovesWithoutACapture = 0;
     board [ move [ 1 ] ] = redKing;
     score [ redKing ] += 1;
     score [ redMan ] -= 1;
   }
-  if ( Math.floor ( move [ 1 ] - 2 ) == 0 && piece == whiteMan && currentPlayer == whiteMan ) {
+  if ( ( Math.floor ( move [ 1 ] / ten ) - 2 ) == 0 && piece == whiteMan && currentPlayer == whiteMan ) {
     numberOfMovesWithoutACapture = 0;
     board [ move [ 1 ] ] = whiteKing;
     score [ whiteKing ] += 1;
@@ -239,11 +282,11 @@ function makeTheMove ( move ) {
 }
 function takeBackTheMove ( move, piece, skippedPieces, oldNumberOfMovesWithoutACapture ) {
   numberOfMovesWithoutACapture = oldNumberOfMovesWithoutACapture;
-  if ( Math.floor ( move [ 1 ] - 2 ) == seven && piece == redMan && currentPlayer == redMan ) {
+  if ( ( Math.floor ( move [ 1 ] / ten ) - 2 ) == seven && piece == redMan && currentPlayer == redMan ) {
     score [ redKing ] -= 1;
     score [ redMan ] += 1;
   }
-  if ( Math.floor ( move [ 1 ] - 2 ) == 0 && piece == whiteMan && currentPlayer == whiteMan ) {
+  if ( ( Math.floor ( move [ 1 ] / ten ) - 2 ) == 0 && piece == whiteMan && currentPlayer == whiteMan ) {
     score [ whiteKing ] -= 1;
     score [ whiteMan ] += 1;
   }
@@ -270,7 +313,7 @@ function getLegalMoves(){
   let king = ( currentPlayer == whiteMan ) ? whiteKing: redKing;
   for ( let i = 0; i < eight; i++ ) {
     for ( let j = 0; j < eight; j++ ) {
-      let index = 21 + i * ten + j;
+      let index = twentyOne + i * ten + j;
       let piece = board [ index ];
       if ( piece == currentPlayer || piece == king ) {
         playableSquares.push ( index );
@@ -438,7 +481,7 @@ function displayBoard(){
   let vtr = ``
   for ( let row = 0;row < size; row++ ) {
     for ( let column = 0; column < size; column++ ) {
-      vtr += board [ ( seven - row ) * ten + column + 21 ] + " ";
+      vtr += board [ ( seven - row ) * ten + column + twentyOne ] + " ";
     }
     vtr += `\n`
   }
@@ -449,7 +492,7 @@ function parseBoard()
 {
   for(let row=0;row<eight;row++){
       for(let column=0;column<eight;column++){
-      let index = row * ten + column + 21;
+      let index = row * ten + column + twentyOne;
       let square = document.getElementById ( index );
       let piece = square.getElementsByTagName(`div`)[0];
       if ( board [ index ] == 1 ) {
