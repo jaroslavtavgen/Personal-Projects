@@ -1,10 +1,24 @@
 let board = Array.from ( {length:120}, _=>5 );
 let currentPlayer;
+let history2 = [];
+let multiplicator = 1;
 let numberOfMovesWithoutACapture = 0;
 let numberOfRedPieces = 0;
 let numberOfRedKings = 0;
 let numberOfWhitePieces = 0;
 let numberOfWhiteKings = 0;
+let three = 3;
+let four = 4;
+let five = 5;
+let eleven = 11;
+let twenty = 20;
+let eight = 8;
+let seven = eight-1;
+let nine = eight+1;
+let ten = eight + 2;
+let eighteen = nine * 2;
+let elevenBoard = ten + 1;
+let twenty_two = eleven * 2;
 let ply = 1;
 let redKing = 2;
 let redMan = 1;
@@ -13,26 +27,30 @@ let size = 8;
 let whiteKing = 4;
 let whiteMan = 3;
 currentPlayer = redMan;
-for ( let row = 0;row < size; row++ ) {
-    for ( let column = 0; column < size; column++ ) {
-        let index = 21 + row * 10 + column;
-        let square = document.getElementsByClassName(`square`) [ ( 7 - row ) * 8 + column ];
+for ( let row = 0;row < eight; row++ ) {
+    for ( let column = 0; column < eight; column++ ) {
+        let index = 21 + row * ten + column;
+        let square = document.getElementsByClassName(`square`) [ ( seven - row ) * eight + column ];
         square.id = index;
         square.addEventListener(`click`, a1);
         if(row==0 || row == 2){
             board[index] = (column+1)%2;
+            //board [ index ] = 0;
             if(column%2 == 0) score [ 1 ] += 1;
         }
         else if(row==1){
             board[index] = (column)%2;
+            //board [ index ] = 0;
             if(column%2 == 1) score [ 1 ] += 1;
         }
         else if(row==5 || row == 7){
             board[index] = (column%2) * 3;
+            //board [ index ] = 0;
             if(column%2 == 1) score [ 3 ] += 1;
         }
         else if(row==6){
             board[index] = ((column+1)%2)*3;
+            //board [ index ] = 0;
             if(column%2 == 0) score [ 3 ] += 1;
         }
         else{
@@ -40,128 +58,97 @@ for ( let row = 0;row < size; row++ ) {
         }
     }
 }
-minimax();
-parseBoard();
+/*board [ 98 ] = 2;
+board [ 81 ] = 1;
+board [ 83 ] = 2;
+board [ 85 ] = 2;
+board [ 72 ] = 1;
+board [ 78 ] = 1;
+board [ 58 ] = 2;
+board [ 38 ] = 4;
+board [ 23 ] = 4;*/
+score = [
+  0, 
+  board.filter ( e=>e==redMan ).length, 
+  board.filter ( e=>e==redKing ).length, 
+  board.filter ( e=>e==whiteMan ).length, 
+  board.filter ( e=>e==whiteKing ).length
+];
+let number = 0;
+minimax ( false, 1, [] );
+parseBoard ();
 let legalMoves = generateMoves();
 function toggleSide() {
   if ( currentPlayer == redMan ) currentPlayer = whiteMan;
   else currentPlayer = redMan;
 }
-function minimax(previousMoveWasAJump) {
+function minimax(previousMoveWasAJump, depth, history1) {
   let moves = [];
-  let playFurther = true;
-  if ( ply < 3 ) moves = generateMoves();
-  else if ( ply == 3 ) {
-    playFurther = false;
+  let playFurther = false;
+  if ( ply < three * multiplicator ) {
+    moves = generateMoves();
+    playFurther = true;
+  }
+  else if ( ply == three * multiplicator ) {
+    moves = generateMoves ();
+    if ( moves [ 0 ] && moves [ 0 ] [ 0 ] && moves [ 0 ] [ 0 ] [ 4 ] ) {
+      playFurther = true;
+    }
+    else if ( previousMoveWasAJump ) {
+      playFurther = true;
+    }
+    else {
+      for ( let i = 0; i < moves[0].length; i++ ) {
+        let move = moves [ 0 ] [ i ];
+        let arr = makeTheMove ( move );
+        let potentialJumps = generateMoves();
+        if ( potentialJumps [ 0 ] && potentialJumps [ 0 ] [ 0 ] && potentialJumps [ 0 ] [ 0 ] [ 4 ] ) {
+          for ( let j = 0; j < potentialJumps[0].length; j++ ) {
+            let jump = potentialJumps [ 0 ] [ j ];
+            let arr2 = makeTheMove ( jump );
+            let potentialExchanges = generateMoves();
+            takeBackTheMove ( jump, arr2 [ 0 ], arr2 [ 1 ], arr2 [ 2 ] );
+            if ( potentialExchanges [ 0 ] && potentialExchanges [ 0 ] [ 0 ] && potentialExchanges [ 0 ] [ 0 ] [ 4 ] ) {
+              playFurther = true;
+              break;
+            }
+          }
+        }
+        takeBackTheMove ( move, arr [ 0 ], arr [ 1 ], arr [ 2 ] );
+      }        
+    }
+  }
+  else if ( ply == four * multiplicator ) {
     moves = generateMoves();
     if ( moves [ 0 ] && moves [ 0 ] [ 0 ] && moves [ 0 ] [ 0 ] [ 4 ] ) playFurther = true;
     else {
-      if ( previousMoveWasAJump ) playFurther = true;
-      else {
-        for ( let i = 0; i < moves[0].length; i++ ) {
-          let move = moves [ 0 ] [ i ];
-          let piece = board [ move [ 0 ] ];
-          let to = board [ move [ 0 ] ];
-          board [ move [ 1 ] ] = piece;
-          board [ move [ 0 ] ] = 0;
-          toggleSide();
-          let potentialJumps = generateMoves();
-          if ( potentialJumps [ 0 ] && potentialJumps [ 0 ] [ 0 ] && potentialJumps [ 0 ] [ 0 ] [ 4 ] ) {
-            for ( let j = 0; j < potentialJumps[0].length; j++ ) {
-              let jump = potentialJumps [0][ j ];
-              let jumper = board [ jump [ 0 ] ];
-              let skippedPieces = jump [ 2 ].map ( e=>board [ e ] );
-              board [ jump [ 1 ] ] = jumper;
-              if ( jump [ 1 ] > 90 && jump [ 1 ] < 99 && currentPlayer == redMan ) {
-                board [ jump [ 1 ] ] = redKing;
-              }
-              if ( jump [ 1 ] < 29 && jump [ 1 ] > 20 && currentPlayer == whiteMan ) {
-                board [ jump [ 1 ] ] = whiteKing;
-              }
-              board [ jump [ 0 ] ] = 0;
-              
-              for ( let j = 0; j < jump [ 2 ].length; j++ ) {
-                board [ jump [ 2 ] [ j ] ] = 0;
-              }    
-              toggleSide();
-              let potentialExchanges = generateMoves();
-              for ( let j = 0; j < jump [ 2 ].length; j++ ) {
-                board [ jump [ 2 ] [ j ] ] = skippedPieces [ j ];
-              }    
-              board [ jump [ 0 ] ] = jumper;
-              board [ jump [ 1 ] ] = 0;
-              toggleSide();
-              if ( potentialExchanges [ 0 ] [ 4 ] ) {
-                playFurther = true;
-                break;
-              }
+      for ( let i = 0; i < moves[0].length; i++ ) {
+        let move = moves [ 0 ] [ i ];
+        let arr = makeTheMove ( move );
+        let potentialJumps = generateMoves();
+        if ( potentialJumps [ 0 ] && potentialJumps [ 0 ] [ 0 ] && potentialJumps [ 0 ] [ 0 ] [ 4 ] ) {
+          for ( let j = 0; j < potentialJumps[0].length; j++ ) {
+            let jump = potentialJumps [ 0 ] [ j ];
+            let arr2 = makeTheMove ( jump );
+            let potentialExchanges = generateMoves();
+            takeBackTheMove ( jump, arr2 [ 0 ], arr2 [ 1 ], arr2 [ 2 ] );
+            if ( potentialExchanges [ 0 ] && potentialExchanges [ 0 ] [ 0 ] && potentialExchanges [ 0 ] [ 0 ] [ 4 ] ) {
+              playFurther = true;
+              break;
             }
           }
-          board [ move [ 0 ] ] = piece;
-          board [ move [ 1 ] ] = 0;
-          toggleSide();
-        }          
+        }
+        takeBackTheMove ( move, arr [ 0 ], arr [ 1 ], arr [ 2 ] );
       }
     }
   }
-  else if ( ply == 4 ) {
-    playFurther = false;
-    moves = generateMoves();
-    if ( moves [ 0 ] && moves [ 0 ] [ 0 ] && moves [ 0 ] [ 0 ] [ 4 ] ) playFurther = true;
-    else {
-      if ( true ) {
-        for ( let i = 0; i < moves[0].length; i++ ) {
-          let move = moves [ 0 ] [ i ];
-          let piece = board [ move [ 0 ] ];
-          let to = board [ move [ 0 ] ];
-          board [ move [ 1 ] ] = piece;
-          board [ move [ 0 ] ] = 0;
-          toggleSide();
-          let potentialJumps = generateMoves();
-          if ( potentialJumps [ 0 ] && potentialJumps [ 0 ] [ 0 ] && potentialJumps [ 0 ] [ 0 ] [ 4 ] ) {
-            for ( let j = 0; j < potentialJumps[0].length; j++ ) {
-              let jump = potentialJumps [0][ j ];
-              let jumper = board [ jump [ 0 ] ];
-              let skippedPieces = jump [ 2 ].map ( e=>board [ e ] );
-              board [ jump [ 1 ] ] = jumper;
-              if ( jump [ 1 ] > 90 && jump [ 1 ] < 99 && currentPlayer == redMan ) {
-                board [ jump [ 1 ] ] = redKing;
-              }
-              if ( jump [ 1 ] < 29 && jump [ 1 ] > 20 && currentPlayer == whiteMan ) {
-                board [ jump [ 1 ] ] = whiteKing;
-              }
-              board [ jump [ 0 ] ] = 0;              
-              for ( let j = 0; j < jump [ 2 ].length; j++ ) {
-                board [ jump [ 2 ] [ j ] ] = 0;
-              }    
-              toggleSide();
-              let potentialExchanges = generateMoves();
-              for ( let j = 0; j < jump [ 2 ].length; j++ ) {
-                board [ jump [ 2 ] [ j ] ] = skippedPieces [ j ];
-              }    
-              board [ jump [ 0 ] ] = jumper;
-              board [ jump [ 1 ] ] = 0;
-              toggleSide();
-              if ( potentialExchanges [ 0 ] [ 4 ] ) {
-                playFurther = true;
-                break;
-              }
-            }
-          }
-          board [ move [ 0 ] ] = piece;
-          board [ move [ 1 ] ] = 0;
-          toggleSide();
-        }          
-      }
+  else if ( ply > four * multiplicator && ply < eleven * multiplicator ) {
+    moves = generateMoves ();
+    if ( moves [ 0 ] && moves [ 0 ] [ 0 ] && moves [ 0 ] [ 0 ] [ 4 ] ) {
+      playFurther = true;
     }
-  }
-  else if ( ply > 4 && ply < 11 ) {
-    playFurther = false;
-    moves = generateMoves();
-    if ( moves [ 0 ] && moves [ 0 ] [ 0 ] && moves [ 0 ] [ 0 ] [ 4 ] ) playFurther = true;
   }    
-  else if ( ply >= 11 ) {
-    playFurther = false;
+  else if ( ply >= eleven * multiplicator ) {
     moves = generateMoves();
     if ( moves [ 0 ] && moves [ 0 ] [ 0 ] && moves [ 0 ] [ 0 ] [ 4 ] ) {
       if ( Math.abs ( score [ 2 ] - score [ 4 ] ) < 2 ) {
@@ -169,81 +156,109 @@ function minimax(previousMoveWasAJump) {
       }
     }
   }
-  else if ( ply >= 20 ) {
-    playFurther = false;
+  else if ( ply >= twenty * multiplicator ) {
+    playFurther = true;
+    moves = generateMoves ();
   }
-  if ( !moves.length ) {
+  if ( !moves [ 0 ].length ) {
     return -300000;
-  }  
+  }
   if ( !playFurther ) {
     let returnScore = score [ 1 ] + 1.5 * score [ 2 ] - score [ 3 ] - 1.5 * score [ 4 ];
-    if ( currentPlayer == whiteMan ) return -returnScore;
+    if ( currentPlayer == redMan ) return -returnScore;
     return returnScore;
   }
   let bestMove = -1;
   let bestScore = -Infinity;
   for ( let i = 0; i < moves[0].length; i++ ) {
     let move = moves [0][ i ];
-    let piece = board [ move [ 0 ] ];
-    let skippedPieces = move[2].map ( e=>board [ e ] );
-    let oldNumberOfMovesWithoutACapture = numberOfMovesWithoutACapture;
-    if ( move [ 4 ] ) {
-      numberOfMovesWithoutACapture = 0;
+    let arr = makeTheMove ( move );
+    let found;
+    for ( let j = 0; j < history1.length; j++ ) {
+      let currentBoard = history1 [ j ];
+      found = true;
+      for ( let k = 0; k < currentBoard.length; k++ ) {
+        if ( currentBoard [ k ] != board [ k ] ) {
+          found = false;
+          break;
+        }
+      }
+      if ( found ) break;
     }
-    else {
-      numberOfMovesWithoutACapture++;
+    let currentScore;
+    if ( found ) {
+      takeBackTheMove ( move, arr [ 0 ], arr [ 1 ], arr [ 2 ] );
+      currentScore = 0;
     }
-    board [ move [ 1 ] ] = piece;
-    if ( move [ 1 ] > 90 && move [ 1 ] < 99 && currentPlayer == redMan ) {
-      numberOfMovesWithoutACapture = 0;
-      board [ move [ 1 ] ] = redKing;
+    else{
+      ply += 1;
+      history1.push([...board]);
+      currentScore = minimax ( move [ 4 ], depth + 1, history1 );
+      history1.pop();
+      ply -= 1;
+      takeBackTheMove ( move, arr [ 0 ], arr [ 1 ], arr [ 2 ] );
     }
-    if ( move [ 1 ] < 29 && move [ 1 ] > 20 && currentPlayer == whiteMan ) {
-      numberOfMovesWithoutACapture = 0;
-      board [ move [ 1 ] ] = whiteKing;
-    }
-    board [ move [ 0 ] ] = 0;
-    for ( let j = 0; j < move [ 2 ].length; j++ ) {
-      score [ board [ move [ 2 ] [ j ] ] ] -= 1;
-      board [ move [ 2 ] [ j ] ] = 0;
-    }
-    toggleSide();
-    ply += 1;
-    let currentScore = minimax ( move [ 4 ] );
-    ply -= 1;
-    numberOfMovesWithoutACapture = oldNumberOfMovesWithoutACapture;
-    for ( let j = 0; j < move [ 2 ].length; j++ ) {
-      let skippedPiece = skippedPieces [ j ];
-      score [ skippedPiece ] += 1;
-      board [ move [ 2 ] [ j ] ] = skippedPiece;
-    }    
-    board [ move [ 0 ] ] = piece;
-    board [ move [ 1 ] ] = 0;
-    toggleSide();
     if ( currentScore > bestScore ) {
       bestScore = currentScore;
       bestMove = move;
-    }
+    }  
   }
-  if ( ply == 1 ) {
-    let move = bestMove;
-    let piece = board [ move [ 0 ] ];
-    let skippedPieces = move[2].map ( e=>board [ e ] );
-    board [ move [ 1 ] ] = piece;
-    if ( move [ 1 ] > 90 && move [ 1 ] < 99 && currentPlayer == redMan ) {
-      board [ move [ 1 ] ] = redKing;
-    }
-    if ( move [ 1 ] < 29 && move [ 1 ] > 20 && currentPlayer == whiteMan ) {
-      board [ move [ 1 ] ] = whiteKing;
-    }
-    board [ move [ 0 ] ] = 0;
-    for ( let j = 0; j < move [ 2 ].length; j++ ) {
-      score [ board [ move [ 2 ] [ j ] ] ] -= 1;
-      board [ move [ 2 ] [ j ] ] = 0;
-    }
-    toggleSide();
-  }
+  if ( ply == 1 ) makeTheMove ( bestMove );
   return bestScore;
+}
+function makeTheMove ( move ) {
+  let piece = board [ move [ 0 ] ];
+  let skippedPieces = move[2].map ( e=>board [ e ] );
+  let oldNumberOfMovesWithoutACapture = numberOfMovesWithoutACapture;
+  if ( move [ 4 ] ) {
+    numberOfMovesWithoutACapture = 0;
+  }
+  else {
+    numberOfMovesWithoutACapture++;
+  }
+  board [ move [ 1 ] ] = piece;
+  if ( Math.floor ( move [ 1 ] - 2 ) == seven && piece == redMan && currentPlayer == redMan ) {
+    numberOfMovesWithoutACapture = 0;
+    board [ move [ 1 ] ] = redKing;
+    score [ redKing ] += 1;
+    score [ redMan ] -= 1;
+  }
+  if ( Math.floor ( move [ 1 ] - 2 ) == 0 && piece == whiteMan && currentPlayer == whiteMan ) {
+    numberOfMovesWithoutACapture = 0;
+    board [ move [ 1 ] ] = whiteKing;
+    score [ whiteKing ] += 1;
+    score [ whiteMan ] -= 1;
+  }
+  board [ move [ 0 ] ] = 0;
+  for ( let j = 0; j < move [ 2 ].length; j++ ) {
+    score [ board [ move [ 2 ] [ j ] ] ] -= 1;
+    board [ move [ 2 ] [ j ] ] = 0;
+  }    
+  toggleSide();
+  return [ piece, skippedPieces, oldNumberOfMovesWithoutACapture ];
+}
+function takeBackTheMove ( move, piece, skippedPieces, oldNumberOfMovesWithoutACapture ) {
+  numberOfMovesWithoutACapture = oldNumberOfMovesWithoutACapture;
+  if ( Math.floor ( move [ 1 ] - 2 ) == seven && piece == redMan && currentPlayer == redMan ) {
+    score [ redKing ] -= 1;
+    score [ redMan ] += 1;
+  }
+  if ( Math.floor ( move [ 1 ] - 2 ) == 0 && piece == whiteMan && currentPlayer == whiteMan ) {
+    score [ whiteKing ] -= 1;
+    score [ whiteMan ] += 1;
+  }
+  for ( let j = 0; j < move [ 2 ].length; j++ ) {
+    let skippedPiece = skippedPieces [ j ];
+    score [ skippedPiece ] += 1;
+    board [ move [ 2 ] [ j ] ] = skippedPiece;
+  }
+  if ( board [ move [ 1 ] ] > piece ) {
+    score [ piece ] += 1;
+    score [ board [ move [ 1 ] ] ] -= 1;
+  }
+  board [ move [ 0 ] ] = piece;
+  board [ move [ 1 ] ] = 0;
+  toggleSide();
 }
 function generateMoves ()
 {
@@ -253,35 +268,35 @@ function getLegalMoves(){
   let moves = [];
   let playableSquares = [];
   let king = ( currentPlayer == whiteMan ) ? whiteKing: redKing;
-  for ( let i = 0; i < size; i++ ) {
-    for ( let j = 0; j < size; j++ ) {
-      let index = 21 + i * 10 + j;
+  for ( let i = 0; i < eight; i++ ) {
+    for ( let j = 0; j < eight; j++ ) {
+      let index = 21 + i * ten + j;
       let piece = board [ index ];
       if ( piece == currentPlayer || piece == king ) {
         playableSquares.push ( index );
-        if ( isAValidJump ( piece, index, index - 9, index - 18 ) ) {
-          let validJumps = getJumpLeaves ( piece, index, index - 9, index - 18 );
+        if ( isAValidJump ( piece, index, index - nine, index - eighteen ) ) {
+          let validJumps = getJumpLeaves ( piece, index, index - nine, index - eighteen );
           for ( let k = 0; k < validJumps.length; k++ ) {
             let jump = validJumps [ k ];
             moves.push ( jump );
           }
         }
-        if ( isAValidJump ( piece, index, index + 9, index + 18 ) ) {
-          let validJumps = getJumpLeaves ( piece, index, index + 9, index + 18 );
+        if ( isAValidJump ( piece, index, index + nine, index + eighteen ) ) {
+          let validJumps = getJumpLeaves ( piece, index, index + nine, index + eighteen );
           for ( let k = 0; k < validJumps.length; k++ ) {
             let jump = validJumps [ k ];
             moves.push ( jump );
           }
         }
-        if ( isAValidJump ( piece, index, index - 11, index - 22 ) ) {
-          let validJumps = getJumpLeaves ( piece, index, index - 11, index - 22 );
+        if ( isAValidJump ( piece, index, index - elevenBoard, index - twenty_two ) ) {
+          let validJumps = getJumpLeaves ( piece, index, index - elevenBoard, index - twenty_two );
           for ( let k = 0; k < validJumps.length; k++ ) {
             let jump = validJumps [ k ];
             moves.push ( jump );
           }
         }
-        if ( isAValidJump ( piece, index, index + 11, index + 22 ) ) {
-          let validJumps = getJumpLeaves ( piece, index, index + 11, index + 22 );
+        if ( isAValidJump ( piece, index, index + elevenBoard, index + twenty_two ) ) {
+          let validJumps = getJumpLeaves ( piece, index, index + elevenBoard , index + twenty_two );
           for ( let k = 0; k < validJumps.length; k++ ) {
             let jump = validJumps [ k ];
             moves.push ( jump );
@@ -294,17 +309,17 @@ function getLegalMoves(){
   for ( let i = 0; i < playableSquares.length; i++ ) {
     let index = playableSquares [ i ];
     let piece = board [ index ];
-    if ( isAValidMove ( piece, index, index - 9 ) ) {
-      moves.push ( [ index, index - 9, [], [], false, ] );
+    if ( isAValidMove ( piece, index, index - nine ) ) {
+      moves.push ( [ index, index - nine, [], [], false, ] );
     }
-    if ( isAValidMove ( piece, index, index + 9 ) ) {
-      moves.push ( [ index, index + 9, [], [], false, ] );
+    if ( isAValidMove ( piece, index, index + nine ) ) {
+      moves.push ( [ index, index + nine, [], [], false, ] );
     }
-    if ( isAValidMove ( piece, index, index - 11 ) ) {
-      moves.push ( [ index, index - 11, [], [], false, ] );
+    if ( isAValidMove ( piece, index, index - elevenBoard ) ) {
+      moves.push ( [ index, index - elevenBoard, [], [], false, ] );
     }
-    if ( isAValidMove ( piece, index, index + 11 ) ) {
-      moves.push ( [ index, index + 11, [], [], false, ] );
+    if ( isAValidMove ( piece, index, index + elevenBoard ) ) {
+      moves.push ( [ index, index + elevenBoard, [], [], false, ] );
     }
   }
   return [moves, false];
@@ -394,17 +409,17 @@ function getLegalJumps ( piece, from ) {
   board [ from ] = piece;
   let moves = [];
   let king = ( piece == whiteMan ) ? whiteKing: redKing;
-  if ( isAValidJump ( piece, from, from + 11, from + 22 ) ) {
-    moves.push ( [ from, from + 22, [], [ from + 22, from ], true, ] );
+  if ( isAValidJump ( piece, from, from + elevenBoard, from + twenty_two ) ) {
+    moves.push ( [ from, from + twenty_two, [], [ from + twenty_two, from ], true, ] );
   }
-  if ( isAValidJump ( piece, from, from - 11, from - 22 ) ) {
-    moves.push ( [ from, from - 22, [], [ from - 22, from ], true, ] );
+  if ( isAValidJump ( piece, from, from - elevenBoard, from - twenty_two ) ) {
+    moves.push ( [ from, from - twenty_two, [], [ from - twenty_two, from ], true, ] );
   }
-  if ( isAValidJump ( piece, from, from - 9, from - 18 ) ) {
-    moves.push ( [ from, from - 18, [], [ from - 18, from ], true, ] );
+  if ( isAValidJump ( piece, from, from - nine, from - eighteen ) ) {
+    moves.push ( [ from, from - eighteen, [], [ from - eighteen, from ], true, ] );
   }
-  if ( isAValidJump ( piece, from, from + 9, from + 18 ) ) {
-    moves.push ( [ from, from + 18, [], [ from + 18, from ], true, ] );
+  if ( isAValidJump ( piece, from, from + nine, from + eighteen ) ) {
+    moves.push ( [ from, from + eighteen, [], [ from + eighteen, from ], true, ] );
   }
   board[from] = current;
   return moves;
@@ -423,7 +438,7 @@ function displayBoard(){
   let vtr = ``
   for ( let row = 0;row < size; row++ ) {
     for ( let column = 0; column < size; column++ ) {
-      vtr += board[(7-row)*10+column+21]+" ";
+      vtr += board [ ( seven - row ) * ten + column + 21 ] + " ";
     }
     vtr += `\n`
   }
@@ -432,9 +447,9 @@ function displayBoard(){
 }
 function parseBoard()
 {
-  for(let row=0;row<8;row++){
-      for(let column=0;column<8;column++){
-      let index = row * 10 + column + 21;
+  for(let row=0;row<eight;row++){
+      for(let column=0;column<eight;column++){
+      let index = row * ten + column + 21;
       let square = document.getElementById ( index );
       let piece = square.getElementsByTagName(`div`)[0];
       if ( board [ index ] == 1 ) {
@@ -460,6 +475,7 @@ function parseBoard()
   }
 }
 function a1(event){
+  if ( numberOfMovesWithoutACapture >= 80 ) return;
   let square;
   if(event.target.classList.contains(`square`)) square = event.target;
   else square = event.target.parentNode;
@@ -472,20 +488,48 @@ function a1(event){
         let move = legalMoves [ 0 ] [ i];
         if ( move [ 1 ] == id ) {
           if ( move [ 0 ] == +[...document.getElementsByClassName(`selected`)][0].id ) {
-            board [ id ] = board [ move [ 0 ] ];
-            if ( id > 90 && id < 99 && currentPlayer == redMan ) {
-              board [ id ] = redKing;
+            let found = false;;
+            for ( let j = 0; j < history2.length; j++ ) {
+              let currentBoard = history2 [ j ];
+              found = true;
+              for ( let k = 0; k < currentBoard.length; k++ ) {
+                if ( currentBoard [ k ] != board [ k ] ) {
+                  found = false;
+                  break;
+                }
+              }
+              if ( found ) break;
             }
-            if ( id < 29 && id > 20 && currentPlayer == whiteMan ) {
-              board [ id ] = whiteKing;
+            if ( !found ) history2.push ( [...board] );
+            makeTheMove ( move );
+            found = false;;
+            for ( let j = 0; j < history2.length; j++ ) {
+              let currentBoard = history2 [ j ];
+              found = true;
+              for ( let k = 0; k < currentBoard.length; k++ ) {
+                if ( currentBoard [ k ] != board [ k ] ) {
+                  found = false;
+                  break;
+                }
+              }
+              if ( found ) break;
             }
-            board [ move [ 0 ] ] = 0;
-            for ( let j = 0; j < move [ 2 ].length; j++ ) {
-              board [ move [ 2 ] [ j ] ] = 0;
-            }
+            if ( !found ) history2.push ( [...board] );
             parseBoard();
-            toggleSide();
-            minimax();
+            minimax ( false, 1, history2 );
+            found = false;
+            for ( let j = 0; j < history2.length; j++ ) {
+              let currentBoard = history2 [ j ];
+              found = true;
+              for ( let k = 0; k < currentBoard.length; k++ ) {
+                if ( currentBoard [ k ] != board [ k ] ) {
+                  found = false;
+                  break;
+                }
+              }
+              if ( found ) break;
+            }
+            if ( !found ) history2.push ( [...board] );            
             parseBoard();
             break;
           }
