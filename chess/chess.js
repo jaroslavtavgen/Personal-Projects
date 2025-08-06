@@ -2,8 +2,22 @@ board = Array.from({length: 120}, _=>100);
 castlePermissions = 0;
 fiftyMoves = 0;
 hisPly = 0;
+material = [0,0];
+numberOfPieces = Array.from({length: 13}, _=>0);
+pieceColors = [2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1];
+pieceIsABishopOrAQueen = [false, false, false, true, false, true, false, false, false, true, false, true, false];
+pieceIsAKing = [false, false, false, false, false, false, true, false, false, false, false, false, true];
+pieceIsAKnight = [false, false, true, false, false, false, false, false, true, false, false, false, false];
+pieceIsAPawn = [false, true, false, false, false, false, false, true, false, false, false, false, false];
+pieceIsARookOrAQueen = [false, false, false, false, true, true, false, false, false, false, true, true, false];
+pieceList = Array.from({length: 10 * 14}, _=>0);
+pieceSlides = [false, false, false, true, true, true, false, false, false, true, true, true, false];
+pieceValues = [0, 100, 325, 325, 500, 900, 50000, 100, 325, 325, 500, 900, 50000];
 ply = 0;
 side = 0;
+thisIsABigPiece = [false, false, true, true, true, true, true, false, true, true, true, true, true];
+thisIsAMajorPeece = [false, false, false, false, true, true, true, false, false, false, true, true, true];
+thisIsAMinorPIece = [false, false, true, true, false, false, false, false, true, true, false, false, false];
 
 function init(){
 	console.log(`init() called`);
