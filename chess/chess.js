@@ -1,4 +1,9 @@
-let files, ranks;
+board = Array.from({length: 120}, _=>100);
+castlePermissions = 0;
+fiftyMoves = 0;
+hisPly = 0;
+ply = 0;
+side = 0;
 
 function init(){
 	console.log(`init() called`);
