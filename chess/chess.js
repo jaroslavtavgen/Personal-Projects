@@ -78,8 +78,54 @@ function parseFen(fen){
 	
 	resetBoard();
 	
-	
-	
+	let rank = 7	
+	let file = 0
+	let count = 0
+	let fenCount = 0
+	let piece=0
+	while((rank >= 0) && fenCount < fen.length){
+		count=1
+		switch(fen[fenCount]){
+			case 'p': piece = 7; break;
+			case 'n': piece = 8; break;
+			case 'b': piece = 9; break;
+			case 'r': piece = 10; break;
+			case 'q': piece = 11; break;
+			case 'k': piece = 12; break;
+			case 'P': piece = 1; break;
+			case 'N': piece = 2; break;
+			case 'B': piece = 3; break;
+			case 'R': piece = 4; break;
+			case 'Q': piece = 5; break;
+			case 'K': piece = 6; break;
+			
+			case '1': 
+			case '2': 
+			case '3': 
+			case '4': 
+			case '5': 
+			case '6': 
+			case '7': 
+			case '8':
+				piece = 0
+				count = fen[fenCount].charCodeAt() - '0'.charCodeAt()
+				break
+			case '/': 
+			case ' ':
+				rank--
+				file = 0
+				fenCount++
+				continue
+			default:
+				console.log(`FEN error`);
+				return
+		}
+		for(let i=0;i<count;i++){
+			board[rank*10+file+21]=piece
+			file++
+		}
+		fenCount++
+	}
 }
 
 function rand(){
