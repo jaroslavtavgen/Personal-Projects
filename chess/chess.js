@@ -65,9 +65,6 @@ function initiateFilesAndRanks(){
 			ranks [ rank * 10 + file + 21 ] = rank;
 		}
 	}
-	console.log(`files[0]:${files[0]} ranks[0]:${ranks[0]}`)	
-	console.log(`files[21]:${files[21]} ranks[21]:${ranks[21]}`)	
-	console.log(`files[95]:${files[95]} ranks[95]:${ranks[95]}`)
 }
 
 function initiateHashKeys(){
@@ -158,7 +155,7 @@ function parseFen(fen){
 function printBoard(){
 	for (let rank=7; rank>-1; rank--){
 		let line = `${rankCharacters[rank]}  `	
-		for ( let file=0;file<7;file++){
+		for ( let file=0;file<8;file++){
 			let piece = board[rank*10+file+21]
 			line += ` ${pieceCharacters[piece]} `
 		}
@@ -166,7 +163,7 @@ function printBoard(){
 	}
 	console.log(``)
 	let line = `  `
-	for ( let file=0;file<7;file++){
+	for ( let file=0;file<8;file++){
 		line += ` ${fileCharacters[file]} `
 	}
 	console.log(line)
@@ -210,6 +207,12 @@ function resetBoard() {
 	moveListStart[ply] = 0
 }
 
+document.getElementById(`SetFen`).addEventListener(`click`, setFen);
+
+function setFen(event){
+	parseFen(document.getElementById(`FenIn`).value);
+	printBoard();
+}
 
 init();
 console.log(`Main Init called`);
