@@ -4,8 +4,11 @@ castlePermissions = 0;
 enPassant = 0;
 fiftyMoves = 0;
 hisPly = 0;
+listOfMoves = Array.from({length: 64 * 256}, _=>0);
 material = [0,0];
-numberOfPieces = Array.from({length: 13}, _=>0);
+moveListStart = Array.from({length: 64}, _=>0);
+moveScores = Array.from({length: 64 * 256}, _=>0);
+numbersOfPieces = Array.from({length: 13}, _=>0);
 pieceColors = [2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1];
 pieceIsABishopOrAQueen = [false, false, false, true, false, true, false, false, false, true, false, true, false];
 pieceIsAKing = [false, false, false, false, false, false, true, false, false, false, false, false, true];
@@ -71,8 +74,42 @@ function initiateHashKeys(){
 	}
 }
 
+function parseFen(fen){
+	
+	resetBoard();
+	
+	
+	
+}
+
 function rand(){
 	return ( Math.floor ( ( Math.random () * 255 ) + 1 ) << 23 ) | ( Math.floor ( ( Math.random () * 255 ) + 1 ) << 16 ) | ( Math.floor ( ( Math.random () * 255 ) + 1 ) << 8 ) | Math.floor ( ( Math.random () * 255 ) + 1 );
+}
+
+function resetBoard() {
+	board = Array.from({length: 120}, _=>100);
+	for ( let row=0;row<8;row++){
+		for(let col=0;col<8;col++){
+			board[row*10+col+21] = 0
+		}
+	}
+	for(let i=0;i<14*120;i++){
+		pieceList[index]=0;
+	}
+	for(let i=0;i<2;i++){
+		material[i] = 0;
+	}
+	for(let i=0;i<13;i++){
+		numbersOfPieces[i]=0;
+	}
+	side = 2;
+	enPassant = 99;
+	fiftyMoves=0;
+	ply=0
+	hisPly=0
+	castlePermissions=0
+	positionKey=0
+	moveListStart[ply] = 0
 }
 
 
