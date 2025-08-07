@@ -301,4 +301,4 @@ while True:
         np.savetxt("b12.txt", b12)
         print("Weights saved!")
     print(
-        f"crosses: {crosses} draws: {draws} naughts: {naughts} minimum_defeats_in_1000_games: {minimum_naughts} total_number_of_games: {total_number_of_games} {number_of_games_in_each_bulk}-game time: {time.time() - thousand_games_timer} seconds Total time: {time.time() - whole_program_timer} seconds elapsed")
+        f"crosses: {crosses} draws: {draws} naughts: {naughts} minimum_naughts: {minimum_naughts} biggest_crosses: {biggest_crosses} total_number_of_games: {total_number_of_games} {number_of_games_in_each_bulk}-game time: {time.time() - thousand_games_timer} seconds Total time: {time.time() - whole_program_timer} seconds elapsed")
