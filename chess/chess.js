@@ -3,12 +3,14 @@ castleKeys = Array.from({length: 16}, _=>0);
 castlePermissions = 0;
 enPassant = 0;
 fiftyMoves = 0;
+fileCharacters = `abcdefgh`
 hisPly = 0;
 listOfMoves = Array.from({length: 64 * 256}, _=>0);
 material = [0,0];
 moveListStart = Array.from({length: 64}, _=>0);
 moveScores = Array.from({length: 64 * 256}, _=>0);
 numbersOfPieces = Array.from({length: 13}, _=>0);
+pieceCharacters = `.PNBRQKpnbrqk`
 pieceColors = [2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1];
 pieceIsABishopOrAQueen = [false, false, false, true, false, true, false, false, false, true, false, true, false];
 pieceIsAKing = [false, false, false, false, false, false, true, false, false, false, false, false, true];
@@ -21,8 +23,11 @@ pieceSlides = [false, false, false, true, true, true, false, false, false, true,
 pieceValues = [0, 100, 325, 325, 500, 900, 50000, 100, 325, 325, 500, 900, 50000];
 ply = 0;
 positionKey = 0;
+rankCharacters = `12345678`
 side = 0;
+sideCharacters = `wb-`
 sideKey = 0;
+startFen = `rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1`
 thisIsABigPiece = [false, false, true, true, true, true, true, false, true, true, true, true, true];
 thisIsAMajorPeece = [false, false, false, false, true, true, true, false, false, false, true, true, true];
 thisIsAMinorPIece = [false, false, true, true, false, false, false, false, true, true, false, false, false];
@@ -42,6 +47,7 @@ function generatePositionKey(){
 		finalKey ^= pieceKeys[enPassant];
 	}
 	finalKey ^= castleKeys [ castlePermissions ];
+	return finalKey
 }
 
 function init(){
@@ -140,7 +146,7 @@ function parseFen(fen){
 		fenCount++
 	}
 	fenCount++
-	if(fen[fenCount] != ' ' ){
+	if(fen[fenCount] != '-' ){
 		file = fen[fenCount].charCodeAt() - 'a'.charCodeAt()
 		rank = fen[fenCount+1].charCodeAt() - '0'.charCodeAt()
 		console.log(`fen[fenCount]: ${fen[fenCount]} File: ${file} Rank: ${rank}`)
@@ -149,6 +155,31 @@ function parseFen(fen){
 	positionKey = generatePositionKey()
 }
 
+function printBoard(){
+	for (let rank=7; rank>-1; rank--){
+		let line = `${rankCharacters[rank]}  `	
+		for ( let file=0;file<7;file++){
+			let piece = board[rank*10+file+21]
+			line += ` ${pieceCharacters[piece]} `
+		}
+		console.log(line)
+	}
+	console.log(``)
+	let line = `  `
+	for ( let file=0;file<7;file++){
+		line += ` ${fileCharacters[file]} `
+	}
+	console.log(line)
+	console.log(`side: ${sideCharacters[side]}`)
+	console.log(`en passant: ${enPassant}`)
+	line = ""
+	if(castlePermissions & 1) line += `K`
+	if(castlePermissions & 2) line += `Q`
+	if(castlePermissions & 4) line += `k`
+	if(castlePermissions & 8) line += `q`
+	console.log(`castle: ${line}`)
+	console.log(`key: ${positionKey.toString(16)}`)
+}
 function rand(){
 	return ( Math.floor ( ( Math.random () * 255 ) + 1 ) << 23 ) | ( Math.floor ( ( Math.random () * 255 ) + 1 ) << 16 ) | ( Math.floor ( ( Math.random () * 255 ) + 1 ) << 8 ) | Math.floor ( ( Math.random () * 255 ) + 1 );
 }
@@ -161,7 +192,7 @@ function resetBoard() {
 		}
 	}
 	for(let i=0;i<14*120;i++){
-		pieceList[index]=0;
+		pieceList[i]=0;
 	}
 	for(let i=0;i<2;i++){
 		material[i] = 0;
@@ -182,3 +213,5 @@ function resetBoard() {
 
 init();
 console.log(`Main Init called`);
+parseFen(startFen)
+printBoard()
