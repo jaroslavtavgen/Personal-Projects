@@ -77,14 +77,9 @@ def dtanh(x):
 board_side_length = 4
 board_length = board_side_length * board_side_length
 
-num_input = board_length
-num_hidden = 64
+num_input = board_length * 3
+num_hidden = 128
 num_output = 1
-
-# This stuff is required for Adam
-beta1   = 0.9
-beta2   = 0.999
-epsilon = 1e-8
 lr      = 0.002
 
 weights_01 = np.loadtxt("weights_01.txt", ndmin=2)
@@ -92,37 +87,42 @@ weights_12 = np.loadtxt("weights_12.txt", ndmin=2)
 b01 = np.loadtxt("b01.txt", ndmin=2)
 b12 = np.loadtxt("b12.txt", ndmin=2)
 
-if len(weights_01[0]) < num_hidden:
+if not len(weights_01) == num_input or not len(weights_01[0]) == num_hidden:
     weights_01 = np.random.uniform(size=(num_input, num_hidden))
     weights_12 = np.random.uniform(size=(num_hidden, num_output))
     b01 = np.random.uniform(size=(1, num_hidden))
     b12 = np.random.uniform(size=(1, num_output))
 
-
+    weights_01 -= 0.5
+    weights_12 -= 0.5
+    b01 -= 0.5
+    b12 -= 0.5
+"""
 # This stuff is required for Adam
 m01 = np.zeros_like(weights_01); v01 = np.zeros_like(weights_01)
 m12 = np.zeros_like(weights_12); v12 = np.zeros_like(weights_12)
 mb01 = np.zeros_like(b01);       vb01 = np.zeros_like(b01)
 mb12 = np.zeros_like(b12);       vb12 = np.zeros_like(b12)
 t = 0
+"""
 
 inputs = []
 outputs = []
 
-improve = True # If we managed to never lose in 1000 games maybe we've solved it? Let's test it then
-no_defeats_in_a_row = 0 # If we haven't lost 100 sets of 1000 games in a row then we've cracked it
-terminate = False # Stop the program after we cracked the game
-minimum_defeats_in_1000_games = 1000000000
 biggest_crosses = -1
+initial_limit = 100
+limit = initial_limit
+minimum_naughts = 1000000000
 total_number_of_games = 0
-limit = 1000
 start = time.time()
-while not terminate:
+while True:
     crosses = 0
     draws = 0
     naughts = 0
     for games in range(1000):
-        board = [0.5] * board_length
+        board = [0] * board_length*3
+        for i in range(board_length):
+            board[board_length*2+i]=1
         game_history = [] # store all moves in the game so we could feed inputs with it
         outcome = 0
         whose_turn = 0.1  # -1: naughts 1: crosses
@@ -132,31 +132,39 @@ while not terminate:
             else:
                 whose_turn = 0.1
             empty_squares_indices = []
-            for square_index, square in enumerate(board):
-                if square == 0.5:
+            for square_index in range(board_length):
+                if board[board_length*2+square_index] == 1:
                     empty_squares_indices.append(square_index)
             if len(empty_squares_indices) == 0:
                 # It's a draw then
                 draws += 1
                 break
             best_move = -1
+            offset = 0
             if whose_turn == 0.1: # Naughts play randomly
                 best_move = random.choice(empty_squares_indices)
+                offset = 1
             else:  # crosses play according to neural network
                 best_score = -1
                 for index in empty_squares_indices:
-                    board[index] = whose_turn
+                    board[index] = 1
+                    board[board_length*2+index] = 0
                     hidden_ = np.dot(np.array([board[:]]), weights_01) + b01
                     hidden_out = _sigmoid(hidden_)
                     output_ = np.dot(hidden_out, weights_12) + b12
                     output_final = _sigmoid(output_)[0][0] # score of the position
-                    board[index] = 0.5
+                    board[index] = 0
+                    board[board_length*2+index] = 1
                     if best_score < output_final:
                         best_score = output_final
                         best_move = index
-            board[best_move] = whose_turn
+            board[offset*board_length + best_move] = 1
+            board[board_length * 2 + best_move] = 0
             game_history.append(board[:])
-            if check_board(whose_turn, board_side_length, board): # did the player win?
+            board_for_checking = []
+            for i in range(board_length):
+                board_for_checking.append(board[offset*board_length+i])
+            if check_board(1, board_side_length, board_for_checking): # did the player win?
                 if whose_turn == 0.1:
                     naughts += 1
                 else:
@@ -174,8 +182,10 @@ while not terminate:
                 inputs.append(game_history[-1][:])
                 outputs.append([1])
         total_number_of_games += 1
-        if improve and len(inputs) >= limit:
-            limit += 500
+        if len(inputs) >= limit:
+            print(f"inputs = {inputs}")
+            print(f"outputs = {outputs}")
+            limit += initial_limit
             train_data = np.array(inputs, ndmin=2)
             target_xor = np.array(outputs, ndmin=2)
             while True:
@@ -189,7 +199,21 @@ while not terminate:
                     losses.append(np.sum(loss))
 
                     error_term = (target_xor - output_final)
+                    grad01 = train_data.T @ (
+                            ((error_term * _delsigmoid(output_final)) * weights_12.T) * _delsigmoid(
+                        hidden_out))
 
+                    grad12 = hidden_out.T @ (error_term * _delsigmoid(output_final))
+
+                    weights_01 += lr * grad01
+                    weights_12 += lr * grad12
+
+                    b01 += np.sum(
+                        lr * ((error_term * _delsigmoid(output_final)) * weights_12.T) * _delsigmoid(
+                            hidden_out), axis=0)
+                    b12 += np.sum(lr * error_term * _delsigmoid(output_final), axis=0)
+
+                    """
                     delta2 = error_term * _delsigmoid(output_final)  # shape (batch , 1)
                     grad12 = hidden_out.T @ delta2  # weights_12 gradient
                     db12 = np.sum(delta2, axis=0, keepdims=True)  # bias   b12  gradient
@@ -222,7 +246,7 @@ while not terminate:
                     mb12 = beta1 * mb12 + (1 - beta1) * db12
                     vb12 = beta2 * vb12 + (1 - beta2) * (db12 ** 2)
                     b12 += lr * (mb12 / (1 - beta1 ** t)) / (np.sqrt(vb12 / (1 - beta2 ** t)) + epsilon)
-
+                """
                 hidden_ = np.dot(train_data, weights_01) + b01
                 hidden_out = _sigmoid(hidden_)
                 output_ = np.dot(hidden_out, weights_12) + b12
@@ -235,11 +259,14 @@ while not terminate:
                 print(correct_loss)
                 if correct_loss < 0.01:
                     break
+                """
                 weights_01 = np.random.uniform(size=(num_input, num_hidden))
                 weights_12 = np.random.uniform(size=(num_hidden, num_output))
                 b01 = np.random.uniform(size=(1, num_hidden))
                 b12 = np.random.uniform(size=(1, num_output))
+                """
 
+                """
                 # This stuff is required for Adam
                 m01 = np.zeros_like(weights_01);
                 v01 = np.zeros_like(weights_01)
@@ -250,15 +277,16 @@ while not terminate:
                 mb12 = np.zeros_like(b12);
                 vb12 = np.zeros_like(b12)
                 t = 0
-
-    if minimum_defeats_in_1000_games > naughts or (minimum_defeats_in_1000_games == naughts and biggest_crosses < crosses):
-        minimum_defeats_in_1000_games = naughts
+                """
+            print("Updated!")
+    if minimum_naughts > naughts or (minimum_naughts == naughts and biggest_crosses < crosses):
+        minimum_naughts = naughts
         biggest_crosses = crosses
         np.savetxt("weights_01.txt", weights_01)
         np.savetxt("weights_12.txt", weights_12)
         np.savetxt("b01.txt", b01)
         np.savetxt("b12.txt", b12)
-        print("Updated!")
+        print("Weights saved!")
     print(
-        f"crosses: {crosses} draws: {draws} naughts: {naughts} minimum_defeats_in_1000_games: {minimum_defeats_in_1000_games} total_number_of_games: {total_number_of_games} {time.time() - start} seconds elapsed")
+        f"crosses: {crosses} draws: {draws} naughts: {naughts} minimum_defeats_in_1000_games: {minimum_naughts} total_number_of_games: {total_number_of_games} {time.time() - start} seconds elapsed")
     # After 1000 games are played we train our network on recorded positions
