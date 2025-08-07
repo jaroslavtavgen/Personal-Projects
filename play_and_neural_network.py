@@ -76,11 +76,14 @@ def dtanh(x):
 
 board_side_length = 4
 board_length = board_side_length * board_side_length
-
-num_input = board_length * 3
-num_hidden = 256
-num_output = 1
+initial_limit = 1000
 lr      = 0.002
+minimum_naughts = 1000000000
+num_hidden = 256
+num_input = board_length * 3
+num_output = 1
+number_of_epochs = 20000
+number_of_games_in_each_bulk = 1000
 
 weights_01 = np.loadtxt("weights_01.txt", ndmin=2)
 weights_12 = np.loadtxt("weights_12.txt", ndmin=2)
@@ -92,7 +95,6 @@ if not len(weights_01) == num_input or not len(weights_01[0]) == num_hidden:
     weights_12 = np.random.uniform(size=(num_hidden, num_output))
     b01 = np.random.uniform(size=(1, num_hidden))
     b12 = np.random.uniform(size=(1, num_output))
-
     weights_01 -= 0.5
     weights_12 -= 0.5
     b01 -= 0.5
@@ -110,16 +112,15 @@ inputs = []
 outputs = []
 
 biggest_crosses = -1
-initial_limit = 1000
 limit = initial_limit
-minimum_naughts = 1000000000
 total_number_of_games = 0
-start = time.time()
+whole_program_timer = time.time()
 while True:
     crosses = 0
     draws = 0
     naughts = 0
-    for games in range(1000):
+    thousand_games_timer = time.time()
+    for games in range(number_of_games_in_each_bulk):
         board = [0] * board_length*3
         for i in range(board_length):
             board[board_length*2+i]=1
@@ -187,12 +188,13 @@ while True:
             print(f"inputs = {inputs}")
             print(f"outputs = {outputs}")
             """
-            start2 = time.time()
             limit += initial_limit
             train_data = np.array(inputs, ndmin=2)
             target_xor = np.array(outputs, ndmin=2)
+            whole_learning_timer = time.time()
             while True:
-                for _ in range(20000):
+                epoch_timer = time.time()
+                for _ in range(number_of_epochs):
                     losses = []
                     hidden_ = np.dot(train_data, weights_01) + b01
                     hidden_out = _sigmoid(hidden_)
@@ -256,12 +258,20 @@ while True:
                 output_final = _sigmoid(output_)
                 loss = abs(target_xor - output_final)
                 biggest_loss = np.max(loss)
-                print(f"biggest_loss: {biggest_loss} num_hidden: {num_hidden}")
-                loss = 0.5 * (target_xor - output_final) ** 2
-                correct_loss = np.sum(loss)
-                print(correct_loss)
+                loss2 = 0.5 * (target_xor - output_final) ** 2
+                correct_loss = np.sum(loss2)
+                print(f"biggest_loss: {biggest_loss} original_loss: {correct_loss} num_hidden: {num_hidden} {number_of_epochs}-epoch time: {time.time() - epoch_timer}")
                 if correct_loss < 0.1:
                     break
+                print("Resetting the weights...")
+                weights_01 = np.random.uniform(size=(num_input, num_hidden))
+                weights_12 = np.random.uniform(size=(num_hidden, num_output))
+                b01 = np.random.uniform(size=(1, num_hidden))
+                b12 = np.random.uniform(size=(1, num_output))
+                weights_01 -= 0.5
+                weights_12 -= 0.5
+                b01 -= 0.5
+                b12 -= 0.5
                 """
                 weights_01 = np.random.uniform(size=(num_input, num_hidden))
                 weights_12 = np.random.uniform(size=(num_hidden, num_output))
@@ -281,7 +291,7 @@ while True:
                 vb12 = np.zeros_like(b12)
                 t = 0
                 """
-            print(f"Updated! Learning time: {time.time() - start2}")
+            print(f"Updated! Learning time: {time.time() - whole_learning_timer}")
     if minimum_naughts > naughts or (minimum_naughts == naughts and biggest_crosses < crosses):
         minimum_naughts = naughts
         biggest_crosses = crosses
@@ -291,5 +301,4 @@ while True:
         np.savetxt("b12.txt", b12)
         print("Weights saved!")
     print(
-        f"crosses: {crosses} draws: {draws} naughts: {naughts} minimum_defeats_in_1000_games: {minimum_naughts} total_number_of_games: {total_number_of_games} {time.time() - start} seconds elapsed")
-    # After 1000 games are played we train our network on recorded positions
+        f"crosses: {crosses} draws: {draws} naughts: {naughts} minimum_defeats_in_1000_games: {minimum_naughts} total_number_of_games: {total_number_of_games} {number_of_games_in_each_bulk}-game time: {time.time() - thousand_games_timer} seconds Total time: {time.time() - whole_program_timer} seconds elapsed")
