@@ -78,7 +78,7 @@ board_side_length = 4
 board_length = board_side_length * board_side_length
 
 num_input = board_length * 3
-num_hidden = 128
+num_hidden = 256
 num_output = 1
 lr      = 0.002
 
@@ -110,7 +110,7 @@ inputs = []
 outputs = []
 
 biggest_crosses = -1
-initial_limit = 100
+initial_limit = 1000
 limit = initial_limit
 minimum_naughts = 1000000000
 total_number_of_games = 0
@@ -183,8 +183,11 @@ while True:
                 outputs.append([1])
         total_number_of_games += 1
         if len(inputs) >= limit:
+            """
             print(f"inputs = {inputs}")
             print(f"outputs = {outputs}")
+            """
+            start2 = time.time()
             limit += initial_limit
             train_data = np.array(inputs, ndmin=2)
             target_xor = np.array(outputs, ndmin=2)
@@ -257,7 +260,7 @@ while True:
                 loss = 0.5 * (target_xor - output_final) ** 2
                 correct_loss = np.sum(loss)
                 print(correct_loss)
-                if correct_loss < 0.01:
+                if correct_loss < 0.1:
                     break
                 """
                 weights_01 = np.random.uniform(size=(num_input, num_hidden))
@@ -278,7 +281,7 @@ while True:
                 vb12 = np.zeros_like(b12)
                 t = 0
                 """
-            print("Updated!")
+            print(f"Updated! Learning time: {time.time() - start2}")
     if minimum_naughts > naughts or (minimum_naughts == naughts and biggest_crosses < crosses):
         minimum_naughts = naughts
         biggest_crosses = crosses
