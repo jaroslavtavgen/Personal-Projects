@@ -126,6 +126,27 @@ function parseFen(fen){
 		}
 		fenCount++
 	}
+	side = (fen[fenCount] == 'w') ? 0:1;
+	fenCount += 2
+	for (let i=0;i<4;i++){
+		if (fen[fenCount] == ' ') break;
+		switch(fen[fenCount]){
+			case 'K': castlePermissions |= 1;
+			case 'Q': castlePermissions |= 2;
+			case 'k': castlePermissions |= 4;
+			case 'q': castlePermissions |= 8;
+			default: break;
+		}
+		fenCount++
+	}
+	fenCount++
+	if(fen[fenCount] != ' ' ){
+		file = fen[fenCount].charCodeAt() - 'a'.charCodeAt()
+		rank = fen[fenCount+1].charCodeAt() - '0'.charCodeAt()
+		console.log(`fen[fenCount]: ${fen[fenCount]} File: ${file} Rank: ${rank}`)
+		enPassant = rank * 10 + file + 21;
+	}
+	positionKey = generatePositionKey()
 }
 
 function rand(){
