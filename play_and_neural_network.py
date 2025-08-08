@@ -45,6 +45,62 @@ def check_board(whose_turn, three, board):
         return True
     return False
 
+number_of_nodes = 0
+
+def minimax(depth, board, board_side_length, whose_turn):
+    global number_of_nodes
+    number_of_nodes += 1
+    if check_board(-whose_turn, board_side_length, board):
+        return -30000
+    if depth == 0:
+        return 0
+    empty_squares_indices = []
+    for square_index in range(board_length):
+        if board[square_index] == 0:
+            empty_squares_indices.append(square_index)
+    if len(empty_squares_indices) == 0:
+        return 0
+    if depth == 0:
+        hidden_ = np.dot(np.array([board[:]]), weights_01) + b01
+        hidden_out = _sigmoid(hidden_)
+        output_ = np.dot(hidden_out, weights_12) + b12
+        return _sigmoid(output_)[0][0]
+    best_score = -1000000
+    for empty_square_index in empty_squares_indices:
+        board[empty_square_index] = whose_turn
+        score = -minimax(depth - 1, board, board_side_length, -whose_turn)
+        board[empty_square_index] = 0
+        if best_score < score:
+            best_score = score
+    return best_score
+
+"""
+def minimax(depth, board, board_side_length, whose_turn):
+    global number_of_nodes
+    number_of_nodes += 1
+    if check_board(-whose_turn, board_side_length, board):
+        return -30000
+    empty_squares_indices = []
+    for square_index in range(board_length):
+        if board[square_index] == 0:
+            empty_squares_indices.append(square_index)
+    if len(empty_squares_indices) == 0:
+        return 0
+    if depth == 0:
+        hidden_ = np.dot(np.array([board[:]]), weights_01) + b01
+        hidden_out = _sigmoid(hidden_)
+        output_ = np.dot(hidden_out, weights_12) + b12
+        return _sigmoid(output_)[0][0]
+    best_score = -1000000000
+    for empty_square_index in empty_squares_indices:
+        board[empty_square_index] = whose_turn
+        score = -minimax(depth - 1, board, board_side_length, -whose_turn)
+        board[empty_square_index] = 0
+        if best_score < score:
+            best_score = score
+    return best_score
+"""
+
 def _sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
@@ -76,14 +132,14 @@ def dtanh(x):
 
 board_side_length = 4
 board_length = board_side_length * board_side_length
-initial_limit = 1000
-lr      = 0.002
+initial_limit = 80
+lr      = 0.1
 minimum_naughts = 1000000000
 num_hidden = 256
-num_input = board_length * 3
+num_input = board_length
 num_output = 1
-number_of_epochs = 20000
-number_of_games_in_each_bulk = 1000
+number_of_epochs = 5000
+number_of_games_in_each_bulk = initial_limit
 
 weights_01 = np.loadtxt("weights_01.txt", ndmin=2)
 weights_12 = np.loadtxt("weights_12.txt", ndmin=2)
@@ -115,64 +171,49 @@ biggest_crosses = -1
 limit = initial_limit
 total_number_of_games = 0
 whole_program_timer = time.time()
-while True:
+while not (minimum_naughts == 0 and biggest_crosses == number_of_games_in_each_bulk):
     crosses = 0
     draws = 0
     naughts = 0
     thousand_games_timer = time.time()
     for games in range(number_of_games_in_each_bulk):
-        board = [0] * board_length*3
-        for i in range(board_length):
-            board[board_length*2+i]=1
+        board = [0] * board_length
         game_history = [] # store all moves in the game so we could feed inputs with it
         outcome = 0
-        whose_turn = 0.1  # -1: naughts 1: crosses
+        whose_turn = -1
+        game_time = time.time()
         while True:
-            if whose_turn == 0.1:
-                whose_turn = 0.9
-            else:
-                whose_turn = 0.1
+            whose_turn = -whose_turn
             empty_squares_indices = []
             for square_index in range(board_length):
-                if board[board_length*2+square_index] == 1:
+                if board[square_index] == 0:
                     empty_squares_indices.append(square_index)
             if len(empty_squares_indices) == 0:
-                # It's a draw then
                 draws += 1
                 break
             best_move = -1
-            offset = 0
-            if whose_turn == 0.1: # Naughts play randomly
+            if whose_turn == -1:
                 best_move = random.choice(empty_squares_indices)
-                offset = 1
-            else:  # crosses play according to neural network
-                best_score = -1
+            else:
+                best_score = -1000000000
                 for index in empty_squares_indices:
-                    board[index] = 1
-                    board[board_length*2+index] = 0
-                    hidden_ = np.dot(np.array([board[:]]), weights_01) + b01
-                    hidden_out = _sigmoid(hidden_)
-                    output_ = np.dot(hidden_out, weights_12) + b12
-                    output_final = _sigmoid(output_)[0][0] # score of the position
+                    board[index] = whose_turn
+                    score = -minimax(4, board, board_side_length, -whose_turn)
                     board[index] = 0
-                    board[board_length*2+index] = 1
-                    if best_score < output_final:
-                        best_score = output_final
+                    if score > best_score:
+                        best_score = score
                         best_move = index
-            board[offset*board_length + best_move] = 1
-            board[board_length * 2 + best_move] = 0
+            board[best_move] = whose_turn
             game_history.append(board[:])
-            board_for_checking = []
-            for i in range(board_length):
-                board_for_checking.append(board[offset*board_length+i])
-            if check_board(1, board_side_length, board_for_checking): # did the player win?
-                if whose_turn == 0.1:
+            if check_board(whose_turn, board_side_length, board): # did the player win?
+                if whose_turn == -1:
                     naughts += 1
                 else:
                     crosses += 1
                 outcome = whose_turn
                 break
-        if outcome == 0.1:
+        print(f"Game time: {time.time() - game_time}")
+        if outcome == -1:
             # If naughts have won we record the last position after our move as losing
             if not game_history[-2] in inputs:
                 inputs.append(game_history[-2][:])
@@ -184,16 +225,13 @@ while True:
                 outputs.append([1])
         total_number_of_games += 1
         if len(inputs) >= limit:
-            """
-            print(f"inputs = {inputs}")
-            print(f"outputs = {outputs}")
-            """
-            limit += initial_limit
+            limit += initial_limit//4
             train_data = np.array(inputs, ndmin=2)
             target_xor = np.array(outputs, ndmin=2)
             whole_learning_timer = time.time()
             while True:
                 epoch_timer = time.time()
+                epochs = 0
                 for _ in range(number_of_epochs):
                     losses = []
                     hidden_ = np.dot(train_data, weights_01) + b01
@@ -201,7 +239,9 @@ while True:
                     output_ = np.dot(hidden_out, weights_12) + b12
                     output_final = _sigmoid(output_)
                     loss = 0.5 * (target_xor - output_final) ** 2
-                    losses.append(np.sum(loss))
+                    actual_loss = np.sum(loss)
+                    if actual_loss < 0.1:
+                        break
 
                     error_term = (target_xor - output_final)
                     grad01 = train_data.T @ (
@@ -217,7 +257,7 @@ while True:
                         lr * ((error_term * _delsigmoid(output_final)) * weights_12.T) * _delsigmoid(
                             hidden_out), axis=0)
                     b12 += np.sum(lr * error_term * _delsigmoid(output_final), axis=0)
-
+                    epochs += 1
                     """
                     delta2 = error_term * _delsigmoid(output_final)  # shape (batch , 1)
                     grad12 = hidden_out.T @ delta2  # weights_12 gradient
@@ -260,18 +300,10 @@ while True:
                 biggest_loss = np.max(loss)
                 loss2 = 0.5 * (target_xor - output_final) ** 2
                 correct_loss = np.sum(loss2)
-                print(f"biggest_loss: {biggest_loss} original_loss: {correct_loss} num_hidden: {num_hidden} {number_of_epochs}-epoch time: {time.time() - epoch_timer}")
+                print(f"biggest_loss: {biggest_loss} epochs = {epochs} original_loss: {correct_loss} num_hidden: {num_hidden} {epochs}-epoch time: {time.time() - epoch_timer}")
                 if correct_loss < 0.1:
                     break
-                print("Resetting the weights...")
-                weights_01 = np.random.uniform(size=(num_input, num_hidden))
-                weights_12 = np.random.uniform(size=(num_hidden, num_output))
-                b01 = np.random.uniform(size=(1, num_hidden))
-                b12 = np.random.uniform(size=(1, num_output))
-                weights_01 -= 0.5
-                weights_12 -= 0.5
-                b01 -= 0.5
-                b12 -= 0.5
+
                 """
                 weights_01 = np.random.uniform(size=(num_input, num_hidden))
                 weights_12 = np.random.uniform(size=(num_hidden, num_output))
@@ -301,4 +333,4 @@ while True:
         np.savetxt("b12.txt", b12)
         print("Weights saved!")
     print(
-        f"crosses: {crosses} draws: {draws} naughts: {naughts} minimum_naughts: {minimum_naughts} biggest_crosses: {biggest_crosses} total_number_of_games: {total_number_of_games} {number_of_games_in_each_bulk}-game time: {time.time() - thousand_games_timer} seconds Total time: {time.time() - whole_program_timer} seconds elapsed")
+        f"\ncrosses: {crosses} draws: {draws} naughts: {naughts} minimum_naughts: {minimum_naughts} biggest_crosses: {biggest_crosses} total_number_of_games: {total_number_of_games} {number_of_games_in_each_bulk}-game time: {time.time() - thousand_games_timer} seconds Total time: {time.time() - whole_program_timer} seconds elapsed\n")
