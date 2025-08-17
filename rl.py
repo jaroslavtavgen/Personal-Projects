@@ -1,46 +1,114 @@
-import random
+import numpy as np
 
-empty_square = 0
-end_plus = 1
-end_minus = 2
-robot = 3
-wall = 4
-offboard = 5
+rows = 3
+cols = 4
+win_state = (0,3)
+lose_state = (1,3)
+start = (2,0)
+deterministic = True
 
-board_width = 5
-board_height = 5
 
-directions = [ -1, 1, board_width, -board_width, board_width+1, board_width-1, -(board_width+1), -(board_width-1)]
-directions = [ -1, 1, board_width, -board_width]
+class State:
+    def __init__(self, state=start):
+        self.board = np.zeros([rows,cols])
+        self.board[1,1] = -1
+        self.state = state
+        self.is_end = False
+        self.determine = deterministic
 
-board = [offboard] * board_width * board_height
-for row in range(1, board_height-1):
-    for col in range(board_width-1):
-        board[ row * board_height + col]= empty_square
-board[board_width] = robot
-board[(board_height-2) * board_width + board_width-2] = end_plus
-board[(board_height-3) * board_width + board_width-2] = end_minus
-print(board)
-reward = 0
-while True:
-    robot_location = board.index(robot)
-    robot_new_location = -1
-    while True:
-        robot_new_location = robot_location + random.choice(directions)
-        if board[robot_new_location] == wall or board[robot_new_location] == offboard:
-            continue
-        break
-    board[robot_location] = empty_square
-    if board[robot_new_location] == end_minus:
-        reward = -1
-        board[robot_new_location] = robot
-        print(board)
-        break
-    if board[robot_new_location] == end_plus:
-        reward = 1
-        board[robot_new_location] = robot
-        print(board)
-        break
-    board[robot_new_location] = robot
-    print(board)
-print(f"Reward: {reward}")
+    def has_the_game_ended(self):
+        if self.state == win_state or self.state == lose_state:
+            self.is_end = True
+
+    def next_position(self, action):
+        if self.determine:
+            next_state = (-1,-1)
+            if action == "up":
+                next_state = (self.state[0]-1, self.state[1])
+            elif action == "down":
+                next_state = (self.state[0]+1, self.state[1])
+            elif action == "left":
+                next_state = (self.state[0], self.state[1]-1)
+            elif action == "right":
+                next_state = (self.state[0], self.state[1]+1)
+            if 0 <= next_state[0] <= (rows - 1):
+                if 0 <= next_state[1] <= (cols - 1):
+                    if not next_state[1] == (1, 1):
+                        return next_state
+            return self.state
+
+
+    def give_reward(self):
+        if self.state == win_state:
+            return 1
+        elif self.state == lose_state:
+            return -1
+        else:
+            return 0
+
+class Agent:
+    def __init__(self):
+        self.states = []
+        self.actions = ["up", "down", "left", "right"]
+        self.state = State()
+        self.lr = 0.2
+        self.exp_rate = 0.3
+
+        self.state_values = {}
+        for i in range(rows):
+            for j in range(cols):
+                self.state_values[(i,j)] = 0
+
+    def choose_action(self):
+        if np.random.uniform(0, 1) < self.exp_rate:
+            action = np.random.choice(self.actions)
+        else:
+            biggest_reward = -1000000000
+            action = ""
+            for a in self.actions:
+                reward = self.state_values[self.state.next_position(a)]
+                if reward > biggest_reward:
+                    biggest_reward = reward
+                    action = a
+        return action
+
+    def play(self, rounds=10):
+        i = 0
+        while i < rounds:
+            if self.state.is_end:
+                reward = self.state.give_reward()
+                self.state_values[self.state.state] = reward
+                print("Game End Reward:", reward)
+                for s in reversed(self.states):
+                    reward = self.state_values[s] + self.lr * (reward - self.state_values[s])
+                    self.state_values[s] = round(reward, 3)
+                self.reset()
+                i += 1
+            else:
+                action = self.choose_action()
+                self.states.append(self.state.next_position(action))
+                print("Current position: {}. Action: {}".format(self.state.state, action))
+                self.state = self.take_action(action)
+                self.state.has_the_game_ended()
+                print("Next State: {}".format(self.state.state))
+                print("---------------------")
+
+    def reset(self):
+        self.states = []
+        self.state = State()
+
+    def showValues(self):
+        for i in range(0, rows):
+            print('----------------------------------')
+            out = '| '
+            for j in range(0, cols):
+                out += str(self.state_values[(i, j)]).ljust(6) + ' | '
+            print(out)
+        print('----------------------------------')
+
+    def take_action(self, action):
+        return State(state=self.state.next_position(action))
+
+ag = Agent()
+ag.play(50)
+print(ag.showValues())
