@@ -16,6 +16,14 @@ class State:
         self.is_end = False
         self.determine = deterministic
 
+    def give_reward(self):
+        if self.state == win_state:
+            return 1
+        elif self.state == lose_state:
+            return -1
+        else:
+            return 0
+
     def has_the_game_ended(self):
         if self.state == win_state or self.state == lose_state:
             self.is_end = True
@@ -31,20 +39,13 @@ class State:
                 next_state = (self.state[0], self.state[1]-1)
             elif action == "right":
                 next_state = (self.state[0], self.state[1]+1)
-            if 0 <= next_state[0] <= (rows - 1):
-                if 0 <= next_state[1] <= (cols - 1):
-                    if not next_state[1] == (1, 1):
-                        return next_state
-            return self.state
+            self.determine = False
 
-
-    def give_reward(self):
-        if self.state == win_state:
-            return 1
-        elif self.state == lose_state:
-            return -1
-        else:
-            return 0
+        if 0 <= next_state[0] <= (rows - 1):
+            if 0 <= next_state[1] <= (cols - 1):
+                if not next_state[1] == (1, 1):
+                    return next_state
+        return self.state
 
 class Agent:
     def __init__(self):
@@ -71,6 +72,16 @@ class Agent:
                     biggest_reward = reward
                     action = a
         return action
+
+    def choose_action_probabilistic(self, action):
+        if action == "up":
+            return np.random.choice(["up", "left", "right"], p=[0.8, 0.1, 0.1])
+        if action == "down":
+            return np.random.choice(["down", "left", "right"], p=[0.8, 0.1, 0.1])
+        if action == "left":
+            return np.random.choice(["left", "up", "down"], p=[0.8, 0.1, 0.1])
+        if action == "right":
+            return np.random.choice(["right", "up", "down"], p=[0.8, 0.1, 0.1])
 
     def play(self, rounds=10):
         i = 0
