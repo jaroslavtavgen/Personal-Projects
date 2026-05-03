@@ -1,0 +1,132 @@
+#include "stdlib.h"
+
+int codeBlock = 0x9660e5;
+int dataBlock = 0x987000;
+
+int main() {
+asm(
+
+"mov [0x987000],eax\n\t"
+"cmp dword ptr[eax],0x34\n\t"
+"jne 1f\n\t"
+"mov edx,[eax+0x1c]\n\t"
+"cmp dword ptr[edx+0x28],0\n\t"
+"jne 2f\n\t"
+"mov dword ptr[edx+0x28],0x447a0000\n\t"
+"2:\n\t"
+"mov edx,[eax+0x20]\n\t"
+"cmp dword ptr[edx+0x28],0\n\t"
+"jne 3f\n\t"
+"mov dword ptr[edx+0x28],0x447a0000\n\t"
+"3:\n\t"
+"mov edx,[eax+0x1c]\n\t"
+"mov edx,[edx+0x28]\n\t"
+"mov dword ptr[0x987004],edx\n\t"
+"mov edx,[eax+0x20]\n\t"
+"mov edx,[edx+0x28]\n\t"
+"mov dword ptr[0x987008],edx\n\t"
+"fld dword ptr [0x987008]\n\t"
+"fsub dword ptr[0x987004]\n\t"
+"mov dword ptr [0x98700c], 0x43c80000\n\t"
+"fld dword ptr [0x98700c]\n\t"
+"fxch st(1)\n\t"
+"fdiv st,st(1)\n\t"
+"mov dword ptr [0x98700c], 0x41200000\n\t"
+"fld dword ptr [0x98700c]\n\t"
+"fyl2x\n\t"
+"fld st\n\t"
+"frndint\n\t"
+"fsub st(1),st\n\t"
+"fxch st(1)\n\t"
+"f2xm1\n\t"
+"fld1\n\t"
+"faddp st(1),st\n\t"
+"fscale\n\t"
+"fstp st(1)\n\t"
+"mov dword ptr [0x98700c], 0x3f800000\n\t"
+"fld dword ptr [0x98700c]\n\t"
+"fadd st,st(1)\n\t"
+"fld dword ptr [0x98700c]\n\t"
+"fdiv st,st(1)\n\t"
+"fstp dword ptr [0x98700c]\n\t"
+
+"fstp dword ptr [0x987010]\n\t"
+"fstp dword ptr [0x987010]\n\t"
+"fstp dword ptr [0x987010]\n\t"
+
+"fld dword ptr [0x987004]\n\t"
+"fsub dword ptr[0x987008]\n\t"
+"mov dword ptr [0x987010], 0x43c80000\n\t"
+"fld dword ptr [0x987010]\n\t"
+"fxch st(1)\n\t"
+"fdiv st,st(1)\n\t"
+"mov dword ptr [0x987010], 0x41200000\n\t"
+"fld dword ptr [0x987010]\n\t"
+"fyl2x\n\t"
+"fld st\n\t"
+"frndint\n\t"
+"fsub st(1),st\n\t"
+"fxch st(1)\n\t"
+"f2xm1\n\t"
+"fld1\n\t"
+"faddp st(1),st\n\t"
+"fscale\n\t"
+"fstp st(1)\n\t"
+"mov dword ptr [0x987010], 0x3f800000\n\t"
+"fld dword ptr [0x987010]\n\t"
+"fadd st,st(1)\n\t"
+"fld dword ptr [0x987010]\n\t"
+"fdiv st,st(1)\n\t"
+"fstp dword ptr [0x987010]\n\t"
+
+"fstp dword ptr [0x987014]\n\t"
+"fstp dword ptr [0x987014]\n\t"
+"fstp dword ptr [0x987014]\n\t"
+
+"mov cl,byte ptr[esi+0xf5bd]\n\t"
+"mov dl,byte ptr[esi+0xf5f3]\n\t"
+"cmp cl,dl\n\t"
+
+"jl 4f\n\t"
+"je 5f\n\t"
+
+"mov dword ptr [0x987014], 0x3f800000\n\t"
+"mov dword ptr [0x987018], 0\n\t"
+
+"6:\n\t"
+"fld dword ptr [0x987014]\n\t"
+"fsub dword ptr[0x98700c]\n\t"
+"mov dword ptr [0x98701c], 0x41f00000\n\t"
+"fmul dword ptr [0x98701c]\n\t"
+"fadd dword ptr [0x987004]\n\t"
+"mov edx,dword ptr[eax+0x1c]\n\t"
+"fstp dword ptr [edx+0x28]\n\t"
+
+"fld dword ptr [0x987018]\n\t"
+"fsub dword ptr[0x987010]\n\t"
+"fmul dword ptr [0x98701c]\n\t"
+"fadd dword ptr [0x987008]\n\t"
+"mov edx,dword ptr[eax+0x20]\n\t"
+"fstp dword ptr [edx+0x28]\n\t"
+
+"1:\n\t"
+"mov cl,byte ptr[esi+0xf5bd]\n\t"
+"mov edx,0x6bda8b\n\t"
+"jmp edx\n\t"
+
+"4:\n\t"
+"mov dword ptr [0x987014], 0\n\t"
+"mov dword ptr [0x987018], 0x3f800000\n\t"
+"jmp 6b\n\t"
+
+"5:\n\t"
+
+"mov dword ptr [0x987014], 0x3f000000\n\t"
+"mov dword ptr [0x987018], 0x3f000000\n\t"
+"jmp 6b\n\t"
+
+);
+
+    int a = 0xabce;
+    return 0;
+}
