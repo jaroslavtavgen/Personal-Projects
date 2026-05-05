@@ -1,0 +1,95 @@
+<body>   	
+    <script>
+document.getElementsByTagName(`html`)[0].innerHTML = ``;
+
+let div = document.createElement(`div`);
+div.id = `game`
+document.body.appendChild(div);
+
+div = document.createElement(`span`);
+div.id = `problem`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`span`);
+div.id = `answer`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`span`);
+div.id = `buttonSpan`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`button`);
+div.id = `button`
+div.style.fontSize = `1em`;
+div.innerHTML = `OK`;
+div.addEventListener(`click`, a2);
+document.getElementById(`buttonSpan`).appendChild(div);
+
+document.getElementById(`game`).style.fontSize = `3em`;
+
+let numbers1, numbers2, number1, number2, answer, answerString, index;
+
+let minimum = 0;
+let maximum = 10;
+
+function generateAProblem () {
+	
+	if ( numbers1.length == 0 ) {
+		
+		maximum += 1;
+		generateASet ();
+		
+	}
+
+	number1 = numbers1.splice(Math.floor(Math.random()*numbers1.length),1)[0];
+	number2 = numbers2.splice(Math.floor(Math.random()*numbers2.length),1)[0];
+	
+	answer = number1 * number2;
+	answerString = answer.toString()
+	
+	document.getElementById(`problem`).innerHTML = `${number1} x ${number2} = `;
+	document.getElementById(`answer`).innerHTML = ``;
+	document.getElementById(`buttonSpan`).style.display = `none`;
+	
+	index = 0;
+	
+}
+
+
+function generateASet () {
+	
+	numbers1 = Array.from ( {length:maximum}, (_,i)=>i);
+	numbers2 = Array.from ( {length:maximum}, (_,i)=>i);
+	
+	generateAProblem ();
+	
+}
+
+generateASet ();
+
+document.addEventListener(`keypress`, a1);
+
+function a1(event) {
+	if ( event.key == answerString[index] ) {
+		document.getElementById(`answer`).innerHTML += event.key;
+		if ( ++index == answerString.length ) {
+			generateAProblem ();
+		}
+	}
+	else {
+		document.getElementById(`answer`).innerHTML = answerString;
+		document.getElementById(`buttonSpan`).style.display = `inline-block`;
+		document.removeEventListener(`keypress`, a1);
+		numbers1.push(number1);
+		numbers2.push(number2);		
+		
+	}
+}
+function a2 ( event ) {
+
+	document.addEventListener(`keypress`, a1);
+	document.getElementById(`buttonSpan`).style.display = `none`;
+	generateAProblem ();
+}
+    </script>
+</body>
