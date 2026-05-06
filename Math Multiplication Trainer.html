@@ -27,27 +27,46 @@ document.getElementById(`buttonSpan`).appendChild(div);
 
 document.getElementById(`game`).style.fontSize = `3em`;
 
-let numbers1, numbers2, number1, number2, answer, answerString, index;
+let numbers1, numbers2, number1, number2, answer, answerString, index, problem;
+let level = 1;
+let problems = [];
+let oldProblems = [];
+let problemHistory = [];
+
+for ( let i = 2; i < 11; i++ ) {
+
+    for ( let j = 2; j < 11; j++ ) {
+    
+        problemHistory.push ( [i,j]);
+        
+    }
+
+}
 
 let minimum = 0;
-let maximum = 10;
+let maximum = 14;
 
 function generateAProblem () {
 	
-	if ( numbers1.length == 0 ) {
-		
-		maximum += 1;
-		generateASet ();
+	if ( problems.length == 0 ) {
+
+        generateASet ();
 		
 	}
+	
 
-	number1 = numbers1.splice(Math.floor(Math.random()*numbers1.length),1)[0];
-	number2 = numbers2.splice(Math.floor(Math.random()*numbers2.length),1)[0];
+	problem = problems.splice(Math.floor(Math.random () * problems.length ), 1)[0];
 	
-	answer = number1 * number2;
-	answerString = answer.toString()
+	if ( Math.random () < 0.5 ) {
+		let temp = problem[0];
+		problem[0] = problem[1];
+		problem[1] = temp;
+	}
 	
-	document.getElementById(`problem`).innerHTML = `${number1} x ${number2} = `;
+	answer = problem[0] * problem[1];
+	answerString = answer.toString();
+	
+	document.getElementById(`problem`).innerHTML = `${problem[0]} x ${problem[1]} = `;
 	document.getElementById(`answer`).innerHTML = ``;
 	document.getElementById(`buttonSpan`).style.display = `none`;
 	
@@ -57,15 +76,34 @@ function generateAProblem () {
 
 
 function generateASet () {
+		
+	problems = [...oldProblems];
+		
+	let newProblem;
+	while (true ){
 	
-	numbers1 = Array.from ( {length:maximum}, (_,i)=>i);
-	numbers2 = Array.from ( {length:maximum}, (_,i)=>i);
-	
-	generateAProblem ();
+		newProblem = [ Math.floor(Math.random()*maximum), Math.floor(Math.random()*maximum) ];
+		
+		if ( newProblem[0] < 2 || newProblem[1] < 2 ) continue;
+		if ( newProblem[0] < 12 && newProblem[1] < 12 ) continue;
+		
+		let found = 0;
+		for ( let i = 0; i < problems.length && !found; i++ ) {
+			if ( problems[i][0] == newProblem[0] && problems[i][1] == newProblem[1] ) found = true;
+			if ( problems[i][0] == newProblem[1] && problems[i][1] == newProblem[0] ) found = true;
+		}
+		if ( !found ) break;
+	}
+    
+    problems.push ( newProblem );
+    
+    oldProblems = [...problems];
 	
 }
 
 generateASet ();
+generateAProblem ();
+
 
 document.addEventListener(`keypress`, a1);
 
@@ -73,6 +111,7 @@ function a1(event) {
 	if ( event.key == answerString[index] ) {
 		document.getElementById(`answer`).innerHTML += event.key;
 		if ( ++index == answerString.length ) {
+			problemHistory.push(problem);
 			generateAProblem ();
 		}
 	}
@@ -80,8 +119,7 @@ function a1(event) {
 		document.getElementById(`answer`).innerHTML = answerString;
 		document.getElementById(`buttonSpan`).style.display = `inline-block`;
 		document.removeEventListener(`keypress`, a1);
-		numbers1.push(number1);
-		numbers2.push(number2);		
+		problems.push(problem);
 		
 	}
 }
