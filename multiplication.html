@@ -1,0 +1,137 @@
+<body>   	
+    <script>
+document.getElementsByTagName(`html`)[0].innerHTML = ``;
+
+let div = document.createElement(`div`);
+div.id = `game`
+document.body.appendChild(div);
+
+div = document.createElement(`span`);
+div.id = `problem`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`span`);
+div.id = `answer`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`span`);
+div.id = `buttonSpan`
+document.getElementById(`game`).appendChild(div);
+
+div = document.createElement(`button`);
+div.id = `button`
+div.style.fontSize = `1em`;
+div.innerHTML = `OK`;
+div.addEventListener(`click`, a2);
+document.getElementById(`buttonSpan`).appendChild(div);
+
+document.getElementById(`game`).style.fontSize = `3em`;
+
+let numbers1, numbers2, number1, number2, answer, answerString, index, problem;
+let level = 1;
+let problems = [];
+let problemHistory = [];
+
+for ( let i = 2; i < 12; i++ ) {
+
+    for ( let j = 2; j < 12; j++ ) {
+    
+        problemHistory.push ( [i,j]);
+    
+    }
+
+}
+
+let minimum = 0;
+let maximum = 8;
+
+function generateAProblem () {
+	
+	if ( problems.length == 0 ) {
+		
+		maximum += 1;
+		level += 1;
+		generateASet ();
+		return;
+		
+	}
+	
+
+	problem = problems.splice(Math.floor(Math.random () * problems.length ), 1)[0];
+	
+	answer = problem[0] * problem[1];
+	answerString = answer.toString();
+	
+	document.getElementById(`problem`).innerHTML = `${problem[0]} x ${problem[1]} = `;
+	document.getElementById(`answer`).innerHTML = ``;
+	document.getElementById(`buttonSpan`).style.display = `none`;
+	
+	index = 0;
+	
+}
+
+
+function generateASet () {
+		
+	problems = [];
+	
+	numbers1 = Array.from( { length: maximum}, (_,i)=>i + 2);
+	numbers2 = Array.from( { length: maximum}, (_,i)=>i + 2);
+	
+	for ( let i = 0; i < numbers1.length; i++ ) {
+		for ( let j = 0; j < numbers2.length; j++ ) {
+			let found = false;
+			for ( let k = 0; k < problemHistory.length && !found; k++ ) {
+			
+				if ( problemHistory [k][0] == numbers1[i] && problemHistory [k][1] == numbers2[j] ) found = true;
+				else if ( problemHistory [k][1] == numbers1[i] && problemHistory [k][0] == numbers2[j] ) found = true;
+			
+			}
+			if ( !found ) {
+			
+				problems.push ( [ numbers1[i], numbers2 [j] ] );
+			
+			}
+		}
+	}
+	
+	/*
+	for ( let i = 0; i < 2 * maximum; i++ ) {
+	
+		problems.push( [ Math.floor(Math.random()*maximum), Math.floor(Math.random()*maximum) ] );
+	
+	}
+	*/
+		
+	generateAProblem ();
+	
+}
+
+generateASet ();
+
+document.addEventListener(`keypress`, a1);
+
+function a1(event) {
+	if ( event.key == answerString[index] ) {
+		document.getElementById(`answer`).innerHTML += event.key;
+		if ( ++index == answerString.length ) {
+			problemHistory.push(problem);
+			generateAProblem ();
+		}
+	}
+	else {
+		document.getElementById(`answer`).innerHTML = answerString;
+		document.getElementById(`buttonSpan`).style.display = `inline-block`;
+		document.removeEventListener(`keypress`, a1);
+		problems.push(problem);
+		
+	}
+}
+function a2 ( event ) {
+
+	document.addEventListener(`keypress`, a1);
+	document.getElementById(`buttonSpan`).style.display = `none`;
+	generateAProblem ();
+}
+    </script>
+</body>
