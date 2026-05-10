@@ -1,0 +1,208 @@
+<body>
+    <script>
+document.getElementsByTagName(`html`)[0].innerHTML = ``;
+
+// --- Starting screen ---
+let div = document.createElement(`div`);
+div.id = `first`;
+document.body.appendChild(div);
+
+let label = document.createElement(`div`);
+label.innerHTML = `Enter word pairs, one per line, in the format:<br>english - German<br><br>Example:<br>love - Liebe<br>house - Haus`;
+label.style.marginBottom = `10px`;
+document.getElementById(`first`).appendChild(label);
+
+let textarea = document.createElement(`textarea`);
+textarea.id = `input`;
+textarea.rows = 15;
+textarea.cols = 50;
+textarea.value = `love - Liebe
+house - Haus
+dog - Hund
+book - Buch
+water - Wasser`;
+document.getElementById(`first`).appendChild(textarea);
+
+document.getElementById(`first`).appendChild(document.createElement(`br`));
+
+let startBtn = document.createElement(`button`);
+startBtn.id = `firstButton`;
+startBtn.innerHTML = `OK`;
+startBtn.addEventListener(`click`, a4);
+document.getElementById(`first`).appendChild(startBtn);
+
+// --- Normalize a German word for forgiving comparison ---
+// Lowercase, remove punctuation/spaces, replace umlauts and ß with plain forms.
+function normalizeGerman(s) {
+    return s.toLowerCase()
+        .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
+        .replace(/ß/g, 'ss')
+        .replace(/[^a-z]/g, '');
+}
+
+// Levenshtein distance, for tolerating tiny speech-recognition slips
+function editDistance(a, b) {
+    const dp = Array.from({length: a.length + 1}, (_, i) => [i]);
+    for (let j = 1; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            dp[i][j] = a[i-1] === b[j-1]
+                ? dp[i-1][j-1]
+                : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+        }
+    }
+    return dp[a.length][b.length];
+}
+
+function answersMatch(spoken, expected) {
+    const a = normalizeGerman(spoken);
+    const b = normalizeGerman(expected);
+    if (!a || !b) return false;
+    if (a === b) return true;
+    // allow 1 character difference for short words, 2 for longer ones
+    const tolerance = b.length <= 4 ? 1 : 2;
+    return editDistance(a, b) <= tolerance;
+}
+
+function a4(event) {
+    // --- Parse word pairs ---
+    const lines = document.getElementById(`input`).value.split(`\n`);
+    const allPairs = [];
+    for (const line of lines) {
+        const idx = line.indexOf(` - `);
+        if (idx === -1) continue;
+        const en = line.substring(0, idx).trim();
+        const de = line.substring(idx + 3).trim();
+        if (en && de) allPairs.push([en, de]);
+    }
+    
+    if (allPairs.length < 2) {
+        alert(`Please enter at least 2 word pairs in the format "english - German".`);
+        return;
+    }
+    
+    document.getElementById(`first`).style.display = `none`;
+    
+    // --- Build game UI ---
+    div = document.createElement(`div`);
+    div.id = `game`;
+    document.body.appendChild(div);
+    
+    div = document.createElement(`span`);
+    div.id = `problem`;
+    document.getElementById(`game`).appendChild(div);
+    
+    div = document.createElement(`span`);
+    div.id = `answer`;
+    div.style.marginLeft = `20px`;
+    document.getElementById(`game`).appendChild(div);
+    
+    div = document.createElement(`span`);
+    div.id = `buttonSpan`;
+    document.getElementById(`game`).appendChild(div);
+    
+    div = document.createElement(`button`);
+    div.id = `button`;
+    div.style.fontSize = `1em`;
+    div.innerHTML = `OK`;
+    div.addEventListener(`click`, a2);
+    document.getElementById(`buttonSpan`).appendChild(div);
+    
+    document.getElementById(`game`).style.fontSize = `3em`;
+    
+    let micStatus = document.createElement(`span`);
+    micStatus.id = `micStatus`;
+    micStatus.style.fontSize = `0.5em`;
+    micStatus.style.marginLeft = `20px`;
+    micStatus.innerHTML = `🎤`;
+    document.getElementById(`game`).appendChild(micStatus);
+    
+    // --- Game state (mirrors multiplication structure) ---
+    let problem, answerWord;
+    let problems = [];      // current "active" pool to draw from this round
+    let oldProblems = [];   // pairs that have been introduced so far
+    let availablePairs = [...allPairs]; // pairs not yet introduced
+    
+    function introduceNewPair() {
+        // Add one pair from availablePairs into the active set
+        if (availablePairs.length === 0) return false;
+        const i = Math.floor(Math.random() * availablePairs.length);
+        const newPair = availablePairs.splice(i, 1)[0];
+        oldProblems.push(newPair);
+        return true;
+    }
+    
+    function generateASet() {
+        // Refill problems with everything introduced so far,
+        // and add one new pair if any remain.
+        problems = [...oldProblems];
+        if (introduceNewPair()) {
+            problems.push(oldProblems[oldProblems.length - 1]);
+        }
+    }
+    
+    function generateAProblem() {
+        if (problems.length === 0) {
+            generateASet();
+        }
+        problem = problems.splice(Math.floor(Math.random() * problems.length), 1)[0];
+        answerWord = problem[1]; // German word
+        
+        document.getElementById(`problem`).innerHTML = `${problem[0]} = `;
+        document.getElementById(`answer`).innerHTML = ``;
+        document.getElementById(`buttonSpan`).style.display = `none`;
+    }
+    
+    // --- Speech recognition ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert(`Speech recognition is not supported in this browser. Try Chrome or Edge.`);
+        return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = `de-DE`;  // expect German speech
+    
+    let waitingForOK = false;
+    
+    recognition.onresult = function(event) {
+        if (waitingForOK) return; // ignore speech while showing wrong answer
+        
+        const last = event.results[event.results.length - 1];
+        const spoken = last[0].transcript;
+        
+        if (answersMatch(spoken, answerWord)) {
+            document.getElementById(`answer`).innerHTML = answerWord;
+            setTimeout(generateAProblem, 600);
+        } else {
+            document.getElementById(`answer`).innerHTML =
+                `${answerWord} <span style="font-size:0.5em;color:#888">(you said: ${spoken})</span>`;
+            document.getElementById(`buttonSpan`).style.display = `inline-block`;
+            problems.push(problem); // put it back so it shows up again
+            waitingForOK = true;
+        }
+    };
+    
+    recognition.onerror = function(event) {
+        console.log(`Speech error:`, event.error);
+        micStatus.innerHTML = `🎤❌`;
+    };
+    
+    recognition.onend = function() {
+        try { recognition.start(); } catch(e) {}
+    };
+    
+    // Start with one pair
+    generateASet();
+    generateAProblem();
+    try { recognition.start(); } catch(e) { console.log(e); }
+    
+    function a2(event) {
+        waitingForOK = false;
+        document.getElementById(`buttonSpan`).style.display = `none`;
+        generateAProblem();
+    }
+}
+    </script>
+</body>
