@@ -1,0 +1,184 @@
+<body>
+    <script>
+document.getElementsByTagName(`html`)[0].innerHTML = ``;
+let div = document.createElement(`div`);
+div.id = `first`
+document.body.appendChild(div);
+div = document.createElement(`input`);
+div.id = `input`
+div.value = 15;
+document.getElementById(`first`).appendChild(div);
+div = document.createElement(`button`);
+div.id = `firstButton`
+div.innerHTML = `OK`;
+div.addEventListener(`click`, a4);
+document.getElementById(`first`).appendChild(div);
+
+// --- Helper: convert spoken text to a number ---
+function parseSpokenNumber(text) {
+    text = text.toLowerCase().trim().replace(/-/g, ' ').replace(/\s+/g, ' ');
+    
+    // If it's already digits, just parse
+    if (/^\d+$/.test(text.replace(/\s/g, ''))) {
+        return parseInt(text.replace(/\s/g, ''));
+    }
+    
+    const small = {
+        'zero':0,'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,
+        'ten':10,'eleven':11,'twelve':12,'thirteen':13,'fourteen':14,'fifteen':15,
+        'sixteen':16,'seventeen':17,'eighteen':18,'nineteen':19
+    };
+    const tens = {
+        'twenty':20,'thirty':30,'forty':40,'fourty':40,'fifty':50,
+        'sixty':60,'seventy':70,'eighty':80,'ninety':90
+    };
+    
+    let total = 0, current = 0;
+    for (const word of text.split(' ')) {
+        if (word in small) current += small[word];
+        else if (word in tens) current += tens[word];
+        else if (word === 'hundred') current = (current || 1) * 100;
+        else if (word === 'thousand') { total += (current || 1) * 1000; current = 0; }
+        else if (/^\d+$/.test(word)) current += parseInt(word);
+    }
+    return total + current;
+}
+
+function a4(event) {
+    let maximum = +document.getElementById(`input`).value;	
+    document.getElementById(`first`).style.display = `none`;
+    div = document.createElement(`div`);
+    div.id = `game`
+    document.body.appendChild(div);
+    div = document.createElement(`span`);
+    div.id = `problem`
+    document.getElementById(`game`).appendChild(div);
+    div = document.createElement(`span`);
+    div.id = `answer`
+    document.getElementById(`game`).appendChild(div);
+    div = document.createElement(`span`);
+    div.id = `buttonSpan`
+    document.getElementById(`game`).appendChild(div);
+    div = document.createElement(`button`);
+    div.id = `button`
+    div.style.fontSize = `1em`;
+    div.innerHTML = `OK`;
+    div.addEventListener(`click`, a2);
+    document.getElementById(`buttonSpan`).appendChild(div);
+    document.getElementById(`game`).style.fontSize = `3em`;
+    
+    // Status indicator for the microphone
+    let micStatus = document.createElement(`span`);
+    micStatus.id = `micStatus`;
+    micStatus.style.fontSize = `0.5em`;
+    micStatus.style.marginLeft = `20px`;
+    micStatus.innerHTML = `🎤`;
+    document.getElementById(`game`).appendChild(micStatus);
+    
+    let numbers1, numbers2, number1, number2, answer, answerString, index, problem;
+    let level = 1;
+    let problems = [];
+    let oldProblems = [];
+    let problemHistory = [];
+    for ( let i = 2; i < 11; i++ ) {
+        for ( let j = 2; j < 11; j++ ) {
+            problemHistory.push ( [i,j]);
+        }
+    }
+    let minimum = 0;	
+    
+    // --- Set up speech recognition ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Speech recognition is not supported in this browser. Try Chrome or Edge.");
+        return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;       // keep listening
+    recognition.interimResults = false;  // only final results
+    recognition.lang = 'en-US';
+    
+    recognition.onresult = function(event) {
+        // Get the most recent result
+        const last = event.results[event.results.length - 1];
+        const spoken = last[0].transcript;
+        const spokenNumber = parseSpokenNumber(spoken);
+        
+        if (spokenNumber === answer) {
+            // Correct!
+            document.getElementById(`answer`).innerHTML = answerString;
+            problemHistory.push(problem);
+            setTimeout(generateAProblem, 500); // small pause before next
+        } else {
+            // Wrong - show correct answer and OK button
+            document.getElementById(`answer`).innerHTML = answerString + ` (you said ${spokenNumber})`;
+            document.getElementById(`buttonSpan`).style.display = `inline-block`;
+            problems.push(problem);
+        }
+    };
+    
+    recognition.onerror = function(event) {
+        console.log('Speech error:', event.error);
+        micStatus.innerHTML = `🎤❌`;
+    };
+    
+    recognition.onend = function() {
+        // Auto-restart so it keeps listening throughout the session
+        try { recognition.start(); } catch(e) {}
+    };
+    
+    function generateAProblem () {
+        if ( problems.length == 0 ) {
+            generateASet ();
+        }
+        
+        problem = problems.splice(Math.floor(Math.random () * problems.length ), 1)[0];
+        
+        if ( Math.random () < 0.5 ) {
+            let temp = problem[0];
+            problem[0] = problem[1];
+            problem[1] = temp;
+        }
+        
+        answer = problem[0] * problem[1];
+        answerString = answer.toString();
+        
+        document.getElementById(`problem`).innerHTML = `${problem[0]} x ${problem[1]} = `;
+        document.getElementById(`answer`).innerHTML = ``;
+        document.getElementById(`buttonSpan`).style.display = `none`;
+        
+        index = 0;
+    }
+    
+    function generateASet () {
+        problems = [...oldProblems];
+        let newProblem;
+        while (true ){
+            newProblem = [ Math.floor(Math.random()*maximum), Math.floor(Math.random()*maximum) ];
+            if ( newProblem[0] < 2 || newProblem[1] < 2 ) continue;
+            if ( newProblem[0] < 12 && newProblem[1] < 12 ) continue;
+            
+            let found = 0;
+            for ( let i = 0; i < problems.length && !found; i++ ) {
+                if ( problems[i][0] == newProblem[0] && problems[i][1] == newProblem[1] ) found = true;
+                if ( problems[i][0] == newProblem[1] && problems[i][1] == newProblem[0] ) found = true;
+            }
+            if ( !found ) break;
+        }
+        problems.push ( newProblem );
+        oldProblems = [...problems];
+    }
+    
+    generateASet ();
+    generateAProblem ();
+    
+    // Start listening
+    try { recognition.start(); } catch(e) { console.log(e); }
+    
+    function a2 ( event ) {
+        document.getElementById(`buttonSpan`).style.display = `none`;
+        generateAProblem ();
+    }
+}
+    </script>
+</body>
